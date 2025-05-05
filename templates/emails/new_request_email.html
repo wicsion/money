@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>Новый запрос от {{ contact_request.requester.get_full_name }}</h3>
+
+<p>Детали запроса:</p>
+<ul>
+    <li>Брокер: {{ broker.get_full_name }}</li>
+    {% if contact_request.property %}
+    <li>Объект: {{ contact_request.property.title }}</li>
+    {% endif %}
+    <li>Дата создания: {{ contact_request.created_at|date:"d.m.Y H:i" }}</li>
+</ul>
+
+<p>Для просмотра деталей перейдите в личный кабинет:</p>
+<a href="{{ request_url }}">Открыть запрос</a>
+{% endblock %}

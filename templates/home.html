@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .category-card { animation: fadeIn 0.6s ease; }
+    .gradient-bg { background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); }
+</style>
+
+<!-- Герой-секция -->
+<div class="hero bg-blue-600 text-white py-20">
+    <div class="container mx-auto px-4 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-pulse"> Найдите идеальную недвижимость</h1>
+        <p class="text-xl mb-8 opacity-95">База проверенных брокеров и эксклюзивных предложений</p>
+
+        <!-- Улучшенная форма поиска -->
+        <div class="max-w-3xl mx-auto bg-white rounded-xl p-2 shadow-2xl">
+            <form class="flex flex-col md:flex-row gap-2"
+                  action="{% if user.is_authenticated %}{% url 'property-list' %}{% else %}{% url 'register' %}?next={% url 'property-list' %}{% endif %}"
+                  method="get">
+                <input type="text"
+                       name="search"
+                       placeholder="📍 Район, ЖК, метро..."
+                       class="flex-grow px-6 py-4 rounded-lg text-gray-800 border-0 focus:ring-4 focus:ring-blue-200">
+
+               <div class="flex gap-2 flex-grow">
+    <select name="property_type"
+            class="px-4 py-3 rounded-lg bg-gray-200 border border-gray-300 focus:border-gray-400 w-1/2
+                   text-gray-800 focus:ring-2 focus:ring-gray-200 transition-colors">
+        <option value="">Тип</option>
+        <option value="apartment">Квартира</option>
+        <option value="house">Дом</option>
+        <option value="commercial">Коммерческая</option>
+    </select>
+
+    <select name="price"
+            class="px-4 py-3 rounded-lg bg-gray-200 border border-gray-300 focus:border-gray-400 w-1/2
+                   text-gray-800 focus:ring-2 focus:ring-gray-200 transition-colors">
+        <option value=""> Бюджет</option>
+        <option value="1-5">До 5 млн</option>
+        <option value="5-10">5-10 млн</option>
+        <option value="10-20">10-20 млн</option>
+    </select>
+</div>
+
+               <button type="submit"
+    class="bg-blue-700 hover:bg-blue-800 px-10 py-4 rounded-xl
+           font-bold text-white transition-all duration-300
+           transform hover:scale-105 shadow-xl
+           border-2 border-blue-900/20
+           flex items-center gap-2">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    </svg>
+    Найти
+</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Категории -->
+<div class="container mx-auto px-4 py-16">
+    <h2 class="text-4xl font-bold text-center mb-16"> Выберите категорию</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Брокеры -->
+        <!-- Брокеры -->
+<a href="{% if user.is_authenticated %}{% url 'broker-list' %}{% else %}{% url 'register' %}?next={% url 'broker-list' %}{% endif %}"
+   class="group">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-300 group-hover:scale-105">
+        <div class="h-48 bg-blue-600 flex items-center justify-center">
+            <i class="fas fa-user-tie text-white text-6xl"></i>
+        </div>
+        <div class="p-6">
+            <h3 class="text-xl font-bold mb-2">Брокеры</h3>
+            <p class="text-gray-600">Профессиональные услуги по подбору недвижимости</p>
+        </div>
+    </div>
+</a>
+
+<!-- Застройщики -->
+<a href="{% if user.is_authenticated %}{% url 'developer-list' %}{% else %}{% url 'register' %}?next={% url 'developer-list' %}{% endif %}"
+   class="group">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-300 group-hover:scale-105">
+        <div class="h-48 bg-green-600 flex items-center justify-center">
+            <i class="fas fa-building text-white text-6xl"></i>
+        </div>
+        <div class="p-6">
+            <h3 class="text-xl font-bold mb-2">Застройщики</h3>
+            <p class="text-gray-600">Проверенные новостройки и ЖК</p>
+        </div>
+    </div>
+</a>
+
+<!-- Объекты -->
+<a href="{% if user.is_authenticated %}{% url 'property-list' %}{% else %}{% url 'register' %}?next={% url 'property-list' %}{% endif %}"
+   class="group">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-300 group-hover:scale-105">
+        <div class="h-48 bg-orange-500 flex items-center justify-center relative">
+
+
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                <i class="fas fa-home text-white text-6xl"></i>
+            </div>
+        </div>
+        <div class="p-6">
+            <h3 class="text-xl font-bold mb-2">Объекты</h3>
+            <p class="text-gray-600">Все предложения на одном сайте</p>
+        </div>
+    </div>
+</a>
+    </div>
+</div>
+
+<!-- Популярные объекты -->
+<div class="bg-gray-50 py-20">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-12">🔥 Популярные объекты</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for property in featured_properties %}
+            <div class="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                <div class="relative h-64 overflow-hidden group">
+                    {% if property.main_image %}
+                        <img src="{{ property.main_image.url }}"
+                             alt="{{ property.title }}"
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    {% else %}
+                        <div class="w-full h-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center">
+                            <i class="fas fa-home text-white text-6xl"></i>
+                        </div>
+                    {% endif %}
+
+                    {% if property.is_premium %}
+                    <div class="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-4 py-2
+                               rounded-full text-sm font-bold shadow-md">
+                        ⚡ PREMIUM
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold mb-3">{{ property.title }}</h3>
+                    <div class="flex items-center mb-4 text-gray-600">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>{{ property.location }}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-2xl font-bold text-blue-600">{{ property.price|floatformat:"0" }} ₽</span>
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                            {{ property.area }} м²
+                        </span>
+                    </div>
+
+                    <a href="{% if user.is_authenticated %}{% url 'property-detail' property.id %}{% else %}{% url 'register' %}?next={% url 'property-detail' property.id %}{% endif %}"
+                       class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-3 rounded-xl
+                              transition-all transform hover:scale-105">
+                        📌 Подробнее
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Кнопка "Смотреть все" -->
+        <div class="text-center mt-12">
+            <a href="{% if user.is_authenticated %}{% url 'property-list' %}{% else %}{% url 'register' %}?next={% url 'property-list' %}{% endif %}"
+               class="inline-block bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold px-12 py-4
+                      rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                 Смотреть все объекты
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+.message-out {
+    margin-left: 20%;
+    margin-right: 2%;
+}
+
+.message-in {
+    margin-right: 20%;
+    margin-left: 2%;
+}
+
+.chat-messages {
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    padding: 1rem;
+}

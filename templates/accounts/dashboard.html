@@ -1,0 +1,583 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .dashboard-section {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 1.25rem;
+        border: 1px solid rgba(59, 130, 246, 0.1);
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
+        backdrop-filter: blur(12px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        @apply mx-2 sm:mx-0;
+    }
+
+    .section-title {
+        @apply text-xl lg:text-2xl font-bold mb-4 lg:mb-6 pb-2 lg:pb-3 relative;
+        background: linear-gradient(45deg, #3b82f6, #6366f1);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .section-title::after {
+        content: '';
+        @apply absolute bottom-0 left-0 w-16 lg:w-20 h-1 rounded-full;
+        background: linear-gradient(90deg, #3b82f6 30%, #6366f1 70%);
+    }
+
+    .profile-card {
+        @apply bg-white rounded-xl p-3 lg:p-5 shadow-md hover:shadow-lg transition-all;
+        border: 1px solid rgba(59, 130, 246, 0.05);
+    }
+
+    .dashboard-avatar-container {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .dashboard-avatar-container:hover {
+         transform: scale(1.05);
+         box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
+    }
+    .dashboard-avatar-image {
+        @apply w-full h-full object-cover;
+        min-width: 100%;
+        min-height: 100%;
+    }
+
+    .dashboard-avatar-fallback {
+        @apply w-full h-full bg-blue-50 flex items-center justify-center rounded-full;
+    }
+
+    .badge-status {
+        @apply px-3 lg:px-4 py-1 lg:py-1.5 rounded-full text-xs lg:text-sm font-medium inline-flex items-center gap-2;
+        background: rgba(59, 130, 246, 0.08);
+        color: #1e40af;
+    }
+
+     .btn-custom {
+        @apply px-4 lg:px-6 py-2 lg:py-3 rounded-xl font-semibold transition-all flex items-center gap-2 text-sm lg:text-base;
+        background: none !important;
+        color: #3b82f6 !important;
+        box-shadow: none !important;
+        border: none !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-custom::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #3b82f6 30%, #6366f1 70%);
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-custom:hover::after {
+        width: 100%;
+    }
+
+    .btn-custom.bg-red-100 {
+        color: #dc2626 !important;
+    }
+
+    .btn-custom.bg-red-100::after {
+        background: linear-gradient(90deg, #dc2626 30%, #ef4444 70%);
+    }
+
+
+     .text-btn {
+        color: #3b82f6 !important;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: none !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .text-btn::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #3b82f6 30%, #6366f1 70%);
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .text-btn:hover::after {
+        width: 100%;
+    }
+
+    @media (max-width: 640px) {
+        .btn-group {
+            @apply flex flex-col gap-2 w-full;
+        }
+
+        .complex-form {
+            @apply flex flex-col gap-2;
+        }
+
+        .complex-form select,
+        .complex-form button {
+            @apply w-full;
+        }
+    }
+
+
+
+      @keyframes pulse {
+        0% { transform: scale(0.95); opacity: 0.8; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    /* Новые стили для текстовых кнопок */
+    .text-btn {
+        color: #3b82f6 !important;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: none !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .text-btn::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #3b82f6 30%, #6366f1 70%);
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .text-btn:hover::after {
+        width: 100%;
+    }
+
+
+</style>
+
+<div class="container mx-auto px-2 sm:px-4 py-4 lg:py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8">
+        <!-- Боковая панель -->
+        <div class="lg:col-span-1 space-y-4 lg:space-y-8">
+            <!-- Профиль -->
+            <div class="dashboard-section p-4 lg:p-6 text-center">
+    <div class="w-44 h-44 lg:w-44lg:h-44 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-100 to-blue-50
+            flex items-center justify-center border-2 border-white shadow-lg">
+    {% if user.avatar %}
+        <img src="{{ user.avatar.url }}"
+             class="w-full h-full rounded-full object-cover"
+             alt="Аватар пользователя">
+    {% else %}
+        <svg class="w-14 h-14 lg:w-16 lg:h-16 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+        </svg>
+    {% endif %}
+</div>
+
+    <h2 class="text-xl lg:text-2xl font-bold text-gray-800 mb-2">{{ user.get_full_name }}</h2>
+
+                <div class="mb-4 lg:mb-5">
+                    <span class="badge-status">
+                        {% if user.user_type == 'broker' %}
+                            <i class="fas fa-certificate text-blue-600"></i>
+                            Лицензированный брокер
+                        {% elif user.user_type == 'developer' %}
+                            <i class="fas fa-building text-blue-600"></i>
+                            Застройщик
+                        {% else %}
+                            <i class="fas fa-user-tag text-blue-600"></i>
+                            Клиент
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="space-y-2 lg:space-y-3 text-left mb-4 lg:mb-6 text-gray-600">
+                    <div class="flex items-center gap-2 lg:gap-3">
+                        <i class="fas fa-phone text-blue-600/80 text-sm lg:text-lg"></i>
+                        <span class="text-gray-800 text-sm lg:text-base">{{ user.phone|default:"Не указан" }}</span>
+                    </div>
+                    <div class="flex items-center gap-2 lg:gap-3">
+                        <i class="fas fa-envelope text-blue-600/80 text-sm lg:text-lg"></i>
+                        <span class="text-gray-800 text-sm lg:text-base">{{ user.email }}</span>
+                    </div>
+                </div>
+
+                <a href="{% url 'profile-update' %}" class="text-btn">
+                    <i class="fas fa-edit mr-2"></i>
+                    Редактировать профиль
+                </a>
+            </div>
+
+            {% if user.user_type == 'broker' %}
+                <div class="dashboard-section p-4 lg:p-6">
+                    <h3 class="section-title">
+                        <i class="fas fa-star text-yellow-400/80"></i>
+                        Отзывы
+                    </h3>
+                    {% for review in user.reviews.all %}
+                        <div class="profile-card mt-3 lg:mt-4">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <img src="{{ review.client.avatar.url }}" class="w-8 h-8 rounded-full object-cover">
+                                    <strong class="text-sm lg:text-base">{{ review.client.get_full_name }}</strong>
+                                </div>
+                                <span class="text-yellow-400 text-sm lg:text-base">★ {{ review.rating }}/5</span>
+                            </div>
+                            <p class="text-xs lg:text-sm">{{ review.comment }}</p>
+                        </div>
+                    {% empty %}
+                        <div class="text-center text-gray-500 py-3 lg:py-4">
+                            <i class="fas fa-comment-slash text-xl lg:text-2xl"></i>
+                            <p class="text-sm lg:text-base mt-2">Нет отзывов</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Основной контент -->
+        <div class="lg:col-span-3 space-y-4 lg:space-y-8">
+            {% if user.user_type == 'client' %}
+                <!-- Избранное -->
+                <div class="dashboard-section p-4 lg:p-8">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-8">
+                        <h3 class="section-title">
+                            <i class="fas fa-heart text-red-500/80"></i>
+                            Избранное
+                        </h3>
+                        <div class="btn-group w-full sm:w-auto">
+                            <a href="{% url 'dashboard' %}?tab=properties" class="text-btn w-full sm:w-auto text-center">
+                                Объекты
+                            </a>
+                            <a href="{% url 'dashboard' %}?tab=brokers" class="text-btn w-full sm:w-auto text-center">
+                                Риелторы
+                            </a>
+                        </div>
+                    </div>
+
+                    {% if active_tab == 'properties' %}
+                        {% for fav in favorite_properties %}
+                        <div class="profile-card mt-3 lg:mt-4">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 lg:p-4">
+                                <div>
+                                    <h4 class="font-semibold text-sm lg:text-base">🏠 {{ fav.property.title }}</h4>
+                                    <small class="text-gray-600 text-xs lg:text-sm">
+                                        📅 {{ fav.created_at|date:"d.m.Y" }}
+                                    </small>
+                                </div>
+                                <button class="btn-custom bg-red-100 text-red-600 hover:bg-red-200 mt-2 sm:mt-0">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="fas fa-inbox text-2xl lg:text-3xl"></i>
+                            <p class="text-sm lg:text-base mt-2">Нет избранных объектов</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        {% for fav in broker_favorites %}
+                        <div class="profile-card mt-3 lg:mt-4">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 lg:p-4">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-sm lg:text-base">
+                                        <a href="{% url 'broker_profile' pk=fav.broker.id %}" class="text-blue-600 hover:text-blue-800">
+                                            👤 {{ fav.broker.get_full_name }}
+                                        </a>
+                                    </h4>
+                                    <small class="text-gray-600 text-xs lg:text-sm">⭐ ★★★★☆</small>
+                                </div>
+                                <div class="complex-form flex gap-2 mt-3 sm:mt-0">
+                                    <form method="POST" action="{% url 'contact_broker' pk=fav.broker.id %}" class="w-full">
+                                        {% csrf_token %}
+                                        <select name="property" class="rounded-lg border px-2 lg:px-3 py-1 text-xs lg:text-sm w-full">
+                                            <option value="">🏢 Выберите объект</option>
+                                            {% for property in fav.broker.created_properties.all %}
+                                                <option value="{{ property.id }}">{{ property.title }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="btn-custom w-full mt-2 lg:mt-0 lg:w-auto">
+                                            📩 Запрос
+                                        </button>
+                                    </form>
+                                    <button class="btn-custom bg-red-100 text-red-600 hover:bg-red-200 w-full lg:w-auto">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="fas fa-user-slash text-2xl lg:text-3xl"></i>
+                            <p class="text-sm lg:text-base mt-2">Нет избранных риелторов</p>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Мои запросы -->
+                <div class="dashboard-section p-4 lg:p-8">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-8">
+                        <h3 class="section-title">
+                            <i class="fas fa-envelope text-blue-500/80"></i>
+                            Мои запросы
+                        </h3>
+                        <a href="{% url 'new_contact_request' %}" class="text-btn">
+                            <i class="fas fa-plus mr-2"></i>
+                            Создать запрос
+                        </a>
+                    </div>
+
+                    {% if request.user.accounts_sent_requests.all %}
+                        {% for req in request.user.accounts_sent_requests.all %}
+                        <div class="profile-card mt-3 lg:mt-4">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 lg:p-4">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-sm lg:text-base">
+                                        <a href="{% url 'contact_request_detail' pk=req.pk %}">
+                                           <i class="fas fa-user-tag text-blue-600"></i>
+                                             {{ req.broker.get_full_name }}
+                                        </a>
+                                    </h4>
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2">
+                                        <span class="text-xs lg:text-sm text-gray-600">
+                                            <i class="fas fa-calendar-alt"></i>
+                                             {{ req.created_at|date:"d.m.Y H:i" }}
+                                        </span>
+                                        <span class="badge-status {% if req.status == 'new' %}badge-new{% endif %}">
+                                            {{ req.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <a href="{% url 'contact_request_detail' pk=req.pk %}"
+                                   class="btn-custom mt-2 sm:mt-0 w-full sm:w-auto text-center">
+                                    <i class="fas fa-comment-dots mr-2"></i>
+                                    Чат
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="fas fa-bell-slash text-2xl lg:text-3xl"></i>
+                            <p class="text-sm lg:text-base mt-2">Нет активных запросов</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+            {% elif user.user_type == 'broker' %}
+                <!-- Ваши объекты -->
+                <div class="dashboard-section p-4 lg:p-8">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-8">
+                        <h3 class="section-title">
+                            <i class="fas fa-home text-green-500/80"></i>
+                            Ваши объекты
+                        </h3>
+                        <a href="{% url 'create_property' %}" class="btn-custom">
+                            <i class="fas fa-plus"></i>
+                            Добавить
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+                        {% for prop in my_properties %}
+                        <div class="profile-card">
+                            <div class="p-3 lg:p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                                    <div>
+                                        <h4 class="text-base lg:text-lg font-bold text-gray-800">🏢 {{ prop.title }}</h4>
+                                        <p class="text-xs lg:text-sm text-gray-600">{{ prop.get_property_type_display }}</p>
+                                    </div>
+                                    <span class="badge-status {% if prop.is_approved %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %} mt-2 sm:mt-0">
+                                        {{ prop.is_approved|yesno:"Одобрен,На модерации" }}
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-2 lg:gap-3 text-xs lg:text-sm text-gray-600 mb-4">
+                                    <span>
+                                        <i class="fas fa-ruble-sign"></i>
+                                        {{ prop.price|floatformat:"0" }} млн
+                                    </span>
+                                    <span>•</span>
+                                    <span>
+                                        <i class="fas fa-expand"></i>
+                                        {{ prop.area }} м²
+                                    </span>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                    <a href="{% url 'property-detail' prop.id %}" class="btn-custom w-full sm:w-auto text-center">
+                                        <i class="fas fa-eye"></i>
+                                        Просмотр
+                                    </a>
+                                    <div class="flex gap-2 w-full sm:w-auto">
+                                        <a href="{% url 'property-update' prop.id %}"
+                                           class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 w-full text-center">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                         <form method="POST" action="{% url 'property-delete' prop.id %}" class="w-full">
+        {% csrf_token %}
+        <button
+            type="submit"
+            onclick="return confirm('Вы уверены, что хотите удалить этот объект?')"
+            class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 w-full">
+            <i class="fas fa-trash"></i>
+        </button>
+                                             </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-span-full text-center py-6">
+                            <div class="inline-block p-4 lg:p-6 bg-blue-50 rounded-full mb-4">
+                                <i class="fas fa-box-open text-2xl lg:text-3xl text-blue-600"></i>
+                            </div>
+                            <h4 class="text-gray-600 text-sm lg:text-base mb-4">Нет добавленных объектов</h4>
+                            <a href="{% url 'create_property' %}" class="btn-custom">
+                                Создать первый объект
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Платное размещение -->
+                <div class="dashboard-section p-4 lg:p-8">
+                    <h3 class="section-title">
+                        <i class="fas fa-rocket text-purple-500/80"></i>
+                        Платное размещение
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mt-4 lg:mt-6">
+                        <div class="profile-card">
+                            <div class="p-3 lg:p-4">
+                                <h4 class="font-semibold text-sm lg:text-base mb-4">🔥 Активные</h4>
+                                {% for listing in active_listings %}
+                                    <div class="flex justify-between items-center py-2">
+                                        <span class="text-xs lg:text-sm">{{ listing.property.title }}</span>
+                                        <span class="text-xs lg:text-sm text-gray-600">{{ listing.days_remaining }} дней</span>
+                                    </div>
+                                {% empty %}
+                                    <div class="text-center text-gray-500 py-3 lg:py-4">
+                                        <p class="text-xs lg:text-sm">Нет активных размещений</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="profile-card">
+                            <div class="p-3 lg:p-4">
+                                <h4 class="font-semibold text-sm lg:text-base mb-4">🚀 Новое размещение</h4>
+                                <a href="{% url 'create_listing' %}" class="text-btn">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Добавить объект
+                                </a>
+                                <div class="mt-3 lg:mt-4 text-xs lg:text-sm text-gray-600">
+                                    <p> Стоимость:</p>
+                                    <p>• Обычное - 10₽/мес</p>
+                                    <p>• VIP - 100₽/мес</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Запросы клиентов -->
+                <div class="dashboard-section p-4 lg:p-8">
+                    <h3 class="section-title">
+                        <i class="fas fa-envelope text-blue-500/80"></i>
+                        Запросы клиентов
+                    </h3>
+
+                    <div class="space-y-3 lg:space-y-4 mt-4 lg:mt-6">
+                        {% for req in contact_requests %}
+                        <div class="profile-card">
+                            <div class="p-3 lg:p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i class="fas fa-user-tag text-blue-600"></i>
+                                            <h4 class="font-semibold text-sm lg:text-base"> {{ req.requester.get_full_name }}</h4>
+                                        </div>
+
+                                        <div class="flex flex-wrap items-center gap-2 lg:gap-4 text-gray-600">
+                                            <span class="flex items-center gap-1 text-xs lg:text-sm">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                {{ req.created_at|date:"d.m.Y H:i" }}
+                                            </span>
+
+                                            <span class="{% if req.status == 'completed' %}bg-green-100 text-green-800{% elif req.status == 'new' %}bg-blue-100 text-blue-800{% else %}bg-yellow-100 text-yellow-800{% endif %} px-2 lg:px-3 py-1 rounded-full text-xs lg:text-sm">
+                                                {{ req.get_status_display }}
+                                            </span>
+                                        </div>
+
+                                        {% if req.property %}
+                                        <div class="mt-2 lg:mt-3 flex items-center gap-2 text-xs lg:text-sm text-blue-600">
+                                            <i class="fas fa-home"></i>
+                                            <span>{{ req.property.title }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <a href="{% url 'contact_request_detail' pk=req.pk %}"
+                                       class="btn-custom mt-3 sm:mt-0 w-full sm:w-auto text-center">
+                                        <i class="fas fa-comment-dots mr-2"></i>
+                                        Написать
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="fas fa-inbox text-2xl lg:text-3xl"></i>
+                            <p class="text-sm lg:text-base mt-2">Нет новых запросов</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.profile-card').forEach(card => {
+        if (window.innerWidth < 640) {
+            card.addEventListener('touchstart', () => {
+                card.style.transform = 'translateY(-2px) scale(1.01)';
+            });
+            card.addEventListener('touchend', () => {
+                card.style.transform = 'translateY(0) scale(1)';
+            });
+        } else {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0) scale(1)';
+            });
+        }
+    });
+
+    // Удаление элементов
+    document.querySelectorAll('.btn-custom.bg-red-100').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const card = this.closest('.profile-card');
+            card.style.opacity = '0';
+            setTimeout(() => card.remove(), 300);
+        });
+    });
+</script>
+{% endblock %}

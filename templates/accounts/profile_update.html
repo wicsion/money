@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<style>
+    .dashboard-form {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2c3e50;
+        border-bottom: 3px solid #3b82f6;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .custom-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        font-size: 16px;
+        transition: all 0.2s ease;
+    }
+
+    .custom-input:focus {
+        border-color: #3b82f6;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .submit-btn {
+        background: #3b82f6;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .submit-btn:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+
+    .file-input {
+        opacity: 0;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .form-field-group {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .role-card {
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+    }
+</style>
+
+<div class="dashboard-form">
+    <h1 class="form-title text-center mb-5">✏️ Редактирование профиля</h1>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Поле аватара -->
+        <div class="file-input-wrapper">
+            <button type="button" class="custom-input text-left bg-white">
+                <i class="bi bi-camera me-2"></i>
+                {% if form.avatar.value %}Изменить аватар{% else %}Загрузить аватар{% endif %}
+            </button>
+            {% render_field form.avatar class+="file-input" %}
+        </div>
+        {% for error in form.avatar.errors %}
+            <div class="error-message">{{ error }}</div>
+        {% endfor %}
+
+        <!-- Основные поля формы -->
+        <div class="form-field-group space-y-4">
+            {% for field in form.visible_fields %}
+                {% if field.name != 'avatar' %}
+                    <div>
+                        <label class="block text-sm font-medium mb-2">{{ field.label }}</label>
+                        {% render_field field class+="custom-input" %}
+
+                        {% if field.help_text %}
+                            <small class="text-sm text-gray-500 mt-1">{{ field.help_text }}</small>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="mt-6">
+            <button type="submit" class="submit-btn">
+                <i class="bi bi-save me-2"></i>Сохранить изменения
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Обновление текста кнопки для аватара
+    document.querySelector('.file-input').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name || 'Файл не выбран';
+        const btn = this.closest('.file-input-wrapper').querySelector('button');
+        btn.innerHTML = `<i class="bi bi-check2-circle me-2"></i>${fileName}`;
+    });
+</script>
+{% endblock %}

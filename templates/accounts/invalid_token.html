@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card shadow-lg">
+        <div class="card-body text-center p-5">
+            <h1 class="display-4 text-danger mb-4">
+                <i class="bi bi-x-circle-fill"></i> Ошибка верификации
+            </h1>
+            <p class="lead mb-4">
+                Недействительная или устаревшая ссылка подтверждения.
+            </p>
+            <div class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle"></i>
+                Запросите новое письмо для подтверждения email.
+            </div>
+            <hr class="my-4">
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
+                Перейти к регистрации
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

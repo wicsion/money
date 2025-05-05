@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% block title %}Завершение регистрации{% endblock %}
+
+{% block content %}
+<style>
+    .registration-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .role-card {
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .role-card.selected {
+        border-color: #3b82f6;
+        background-color: #f0f9ff;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    }
+
+    .profile-preview {
+        border: 2px solid #000;
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 30px;
+        background: #f8fafc;
+    }
+
+    .oval-avatar {
+        border-radius: 50% / 30%;
+        width: 180px;
+        height: 180px;
+        object-fit: cover;
+        border: 2px solid #000;
+        margin: 0 auto 15px;
+    }
+
+    .custom-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        font-size: 16px;
+        transition: all 0.2s ease;
+    }
+
+    .custom-input:focus {
+        border-color: #3b82f6;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="registration-container">
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">
+        <i class="bi bi-person-badge mr-2"></i>Завершение регистрации
+    </h1>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Вывод ошибок -->
+        {% if form.errors %}
+        <div class="bg-red-50 p-4 rounded-lg mb-6">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p class="text-red-600">✖ {{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Выбор роли -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <label class="role-card">
+                <input type="radio" name="role" value="client" class="hidden" required>
+                <div class="text-center">
+                    <i class="bi bi-person text-4xl text-blue-600 mb-3"></i>
+                    <h3 class="text-xl font-semibold">Клиент</h3>
+                    <p class="text-gray-600 mt-2">Пользователь платформы</p>
+                </div>
+            </label>
+
+            <label class="role-card">
+                <input type="radio" name="role" value="broker" class="hidden">
+                <div class="text-center">
+                    <i class="bi bi-briefcase text-4xl text-blue-600 mb-3"></i>
+                    <h3 class="text-xl font-semibold">Риелтор</h3>
+                    <p class="text-gray-600 mt-2">Профессиональное управление недвижимостью</p>
+                </div>
+            </label>
+
+            <label class="role-card">
+                <input type="radio" name="role" value="developer" class="hidden">
+                <div class="text-center">
+                    <i class="bi bi-building text-4xl text-blue-600 mb-3"></i>
+                    <h3 class="text-xl font-semibold">Застройщик</h3>
+                    <p class="text-gray-600 mt-2">Управление строительными проектами</p>
+                </div>
+            </label>
+        </div>
+
+        <!-- Личные данные -->
+        <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="text" name="last_name"
+                       class="custom-input"
+                       placeholder="Фамилия"
+                       value="{{ form.last_name.value|default:'' }}"
+                       required>
+                <input type="text" name="first_name"
+                       class="custom-input"
+                       placeholder="Имя"
+                       value="{{ form.first_name.value|default:'' }}"
+                       required>
+                <input type="text" name="patronymic"
+                       class="custom-input"
+                       placeholder="Отчество"
+                       value="{{ form.patronymic.value|default:'' }}">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Телефон</label>
+                <input type="text"
+                       name="phone"
+                       class="custom-input"
+                       placeholder="+7 (999) 999-99-99"
+                       maxlength="17"
+                       oninput="formatPhone(this)"
+                       onkeydown="handlePhoneInput(event)"
+                       value="{{ form.phone.value|default:'' }}"
+                       required>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Паспорт РФ</label>
+                <input type="text"
+                       name="passport"
+                       class="custom-input"
+                       placeholder="Серия и номер: 1234 567890"
+                       maxlength="11"
+                       oninput="formatPassport(this)"
+                       value="{{ form.passport.value|default:'' }}"
+                       required>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Фотография профиля</label>
+                <input type="file"
+                       name="avatar"
+                       class="custom-input"
+                       accept="image/*">
+                <p class="text-sm text-gray-500 mt-1">Поддерживаемые форматы: JPG, PNG, GIF (до 5MB)</p>
+            </div>
+        </div>
+
+        <!-- Предпросмотр профиля -->
+        <div class="profile-preview">
+            <div class="text-center mb-4">
+                {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}"
+                         class="oval-avatar"
+                         alt="Аватар">
+                {% else %}
+                    <div class="oval-avatar bg-secondary"></div>
+                {% endif %}
+                <h3 class="text-xl font-bold mt-2">
+                    {{ form.last_name.value|default:"Фамилия" }}
+                    {{ form.first_name.value|default:"Имя" }}
+                    {{ form.patronymic.value|default:"Отчество" }}
+                </h3>
+                <p class="text-gray-600">
+                    <span id="preview-role">{% if form.role.value %}{{ form.get_role_display }}{% else %}Роль не выбрана{% endif %}</span>
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="font-medium">Контактная информация:</p>
+                    <p id="preview-phone">{{ form.phone.value|default:"+7 (XXX) XXX-XX-XX" }}</p>
+                    <p>{{ user.email }}</p>
+                </div>
+                <div>
+                    <p class="font-medium">Паспортные данные:</p>
+                    <p id="preview-passport">{{ form.passport.value|default:"XXXX XXXXXX" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+            Завершить регистрацию <i class="bi bi-check2 ml-2"></i>
+        </button>
+    </form>
+</div>
+
+<script>
+    // Форматирование телефона
+    function formatPhone(input) {
+        let numbers = input.value.replace(/\D/g, '');
+        if (numbers.startsWith('7') && numbers.length === 11) {
+            numbers = numbers.substring(1);
+        }
+        let formatted = numbers.replace(/^(\d{3})(\d{3})(\d{2})(\d{2})$/, '+7 ($1) $2-$3-$4');
+        input.value = formatted;
+        document.getElementById('preview-phone').textContent = formatted;
+    }
+
+    // Форматирование паспорта
+    function formatPassport(input) {
+        let numbers = input.value.replace(/\D/g, '');
+        if (numbers.length > 4) {
+            input.value = `${numbers.slice(0,4)} ${numbers.slice(4,10)}`;
+        } else {
+            input.value = numbers;
+        }
+        document.getElementById('preview-passport').textContent = input.value;
+    }
+
+    // Обновление предпросмотра роли
+    document.querySelectorAll('input[name="role"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const roleName = this.closest('.role-card').querySelector('h3').textContent;
+            document.getElementById('preview-role').textContent = roleName;
+
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            this.closest('.role-card').classList.add('selected');
+        });
+    });
+
+    // Обновление превью при изменении полей
+    document.querySelectorAll('input[name="last_name"], input[name="first_name"], input[name="patronymic"]')
+        .forEach(input => {
+            input.addEventListener('input', function() {
+                const fullName = [
+                    document.querySelector('input[name="last_name"]').value,
+                    document.querySelector('input[name="first_name"]').value,
+                    document.querySelector('input[name="patronymic"]').value
+                ].join(' ').trim();
+
+                document.querySelector('.profile-preview h3').textContent =
+                    fullName || "Фамилия Имя Отчество";
+            });
+        });
+</script>
+{% endblock %}

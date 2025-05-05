@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .registration-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-select {
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        width: 100%;
+        transition: all 0.2s ease;
+    }
+
+    .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .role-card {
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .role-card:hover {
+        border-color: #3b82f6;
+        background-color: #f0f9ff;
+    }
+
+    .loading-spinner {
+        width: 1.5rem;
+        height: 1.5rem;
+        border-width: 2px;
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="registration-container">
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">
+        <i class="bi bi-send-check mr-2"></i>📨 Отправить запрос брокеру
+    </h1>
+
+    <form method="post" id="contactForm">
+        {% csrf_token %}
+
+        <!-- Блок ошибок -->
+        {% if form.errors %}
+        <div class="bg-red-50 p-4 rounded-lg mb-6">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p class="text-red-600">✖ {{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="space-y-6">
+            <!-- Выбор брокера -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="role-card">
+                    <label class="block font-medium mb-2">Выберите брокера</label>
+                    {{ form.broker }}
+                </div>
+
+                <div class="role-card">
+                    <label class="block font-medium mb-2">Выберите объект</label>
+                    {{ form.property }}
+                    <div id="propertyLoading" class="mt-2">
+                        <div class="loading-spinner spinner-border text-primary d-none"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопка отправки -->
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700
+                           transition-colors font-medium">
+                <i class="bi bi-send mr-2"></i>Отправить запрос
+            </button>
+        </div>
+    </form>
+</div>
+
+{% block extra_js %}
+<script>
+    // Динамическое обновление стилей select
+    document.querySelectorAll('.form-select').forEach(select => {
+        select.addEventListener('focus', () => {
+            select.parentElement.classList.add('selected');
+        });
+        select.addEventListener('blur', () => {
+            select.parentElement.classList.remove('selected');
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

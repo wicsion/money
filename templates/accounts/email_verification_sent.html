@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-5">
+    <div class="card shadow-lg">
+        <div class="card-body text-center p-5">
+            <h1 class="display-4 text-success mb-4">
+                <i class="bi bi-envelope-check"></i> Проверьте вашу почту
+            </h1>
+            <p class="lead mb-4">
+                Мы отправили письмо с подтверждением на ваш адрес электронной почты.
+            </p>
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i>
+                Если вы не получили письмо в течение 5 минут, проверьте папку "Спам".
+            </div>
+            <hr class="my-4">
+            <p class="text-muted">
+                Уже подтвердили email? 
+                <a href="{% url 'login' %}" class="text-decoration-none">Войти в систему</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

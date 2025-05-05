@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Эксклюзивные объекты</h2>
+    <div class="row">
+        {% for property in properties %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ property.title }}</h5>
+                    <p class="card-text">{{ property.description|truncatechars:150 }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">{{ property.price }} ₽</span>
+                        <small class="text-muted">{{ property.developer.company }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info">Нет доступных эксклюзивных объектов</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Каталог недвижимости | RealEstatePro{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <!-- Заголовок и поиск -->
+    <div class="header-section mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Каталог недвижимости</h1>
+        <div class="flex justify-between items-center gap-4">
+            <form class="flex-grow">
+                <div class="relative">
+                    <input type="search"
+                           name="search"
+                           placeholder="Поиск по названию или локации..."
+                           class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <button type="submit" class="absolute right-3 top-3 text-gray-400 hover:text-blue-600">
+                        <i class="bi bi-search text-xl"></i>
+                    </button>
+                </div>
+            </form>
+            {% if user.is_authenticated and user.is_broker %}
+            <a href="{% url 'property-create' %}" class="btn-primary flex items-center gap-2">
+                <i class="bi bi-plus-lg"></i> Добавить
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Карточки объектов -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for property in properties %}
+        <div class="property-card bg-white rounded-xl shadow-sm hover:shadow-md p-6 border-2 border-gray-100 transition-all">
+            <div class="relative mb-4">
+                <img src="{{ property.main_image.url }}"
+                     class="w-full h-48 object-cover rounded-lg"
+                     alt="{{ property.title }}">
+                {% if property.is_featured %}
+                <span class="absolute top-2 right-2 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
+                    ★ Premium
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold text-gray-800 truncate">{{ property.title }}</h3>
+
+                <div class="flex items-center gap-2 text-blue-600">
+                    <i class="bi bi-geo-alt"></i>
+                    <span class="truncate">{{ property.location }}</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-gray-600">
+                    <div class="flex items-center gap-2">
+                        <i class="bi bi-door-open"></i>
+                        {{ property.rooms }} комн.
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="bi bi-arrows-fullscreen"></i>
+                        {{ property.area }} м²
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mt-4">
+                    <span class="text-2xl font-bold text-blue-600">{{ property.price|floatformat:"0" }} ₽</span>
+                    {% if user.is_authenticated %}
+                    <button class="toggle-favorite" data-property-id="{{ property.id }}">
+                        <i class="bi bi-heart{% if property in user.favorites.all %}-fill text-red-500{% endif %} text-xl"></i>
+                    </button>
+                    {% endif %}
+                </div>
+
+                <a href="{% url 'property-detail' property.id %}"
+                   class="btn-primary block w-full text-center mt-4">
+                    <i class="bi bi-eye"></i> Подробнее
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12 text-gray-500">
+            <i class="bi bi-house-x text-3xl"></i>
+            <p class="mt-2">Объекты не найдены</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    {% if is_paginated %}
+    <div class="pagination flex justify-center gap-2 mt-8">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}"
+           class="page-item px-4 py-2 rounded-lg border-2 border-gray-200 hover:bg-gray-50">
+            <i class="bi bi-chevron-left"></i>
+        </a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <a href="?page={{ num }}"
+           class="page-item px-4 py-2 rounded-lg border-2 {% if num == page_obj.number %}bg-blue-600 text-white border-blue-600{% else %}border-gray-200 hover:bg-gray-50{% endif %}">
+            {{ num }}
+        </a>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}"
+           class="page-item px-4 py-2 rounded-lg border-2 border-gray-200 hover:bg-gray-50">
+            <i class="bi bi-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .property-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .property-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .btn-primary {
+        @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between mb-4">
+        <h2>Мои объекты</h2>
+        <a href="{% url 'property-create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Добавить объект
+        </a>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <!-- Таблица объектов -->
+        </table>
+    </div>
+</div>
+{% endblock %}

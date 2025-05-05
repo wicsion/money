@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<style>
+    .registration-container {
+        max-width: 440px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 1.25rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-input {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 15px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .password-container {
+        position: relative;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #64748b;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        border: none;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-6px); }
+        75% { transform: translateX(6px); }
+    }
+
+    .error-shake {
+        animation: shake 0.4s ease;
+    }
+
+    @media (max-width: 640px) {
+        .registration-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+        .custom-input {
+            padding: 0.75rem;
+        }
+    }
+</style>
+
+<div class="registration-container">
+    <h1 class="text-2xl font-semibold text-center mb-8 text-gray-900">
+        <svg class="w-8 h-8 inline-block mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+        </svg>
+        Создать аккаунт
+    </h1>
+
+    <form method="post" class="space-y-5">
+        {% csrf_token %}
+
+        <!-- Блок ошибок -->
+        {% if form.errors %}
+        <div class="bg-red-50 p-3 rounded-lg mb-4 space-y-2">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p class="text-red-600 text-sm flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Поля формы -->
+        <div class="space-y-4">
+            <input type="text"
+                   name="username"
+                   class="custom-input {% if form.username.errors %}error-shake border-red-500{% endif %}"
+                   placeholder="Логин"
+                   required>
+
+            <input type="email"
+                   name="email"
+                   class="custom-input {% if form.email.errors %}error-shake border-red-500{% endif %}"
+                   placeholder="Email"
+                   required>
+
+            <div class="password-container">
+                <input type="password"
+                       name="password1"
+                       class="custom-input {% if form.password1.errors %}error-shake border-red-500{% endif %}"
+                       placeholder="Пароль"
+                       required>
+                <span class="toggle-password" onclick="togglePassword(this)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                </span>
+            </div>
+
+            <input type="password"
+                   name="password2"
+                   class="custom-input {% if form.password2.errors %}error-shake border-red-500{% endif %}"
+                   placeholder="Подтверждение пароля"
+                   required>
+        </div>
+
+        <!-- Чекбокс и кнопка -->
+        <div class="flex items-center space-x-2 text-sm">
+            <input type="checkbox"
+                   id="terms"
+                   class="w-4 h-4 border-gray-300 rounded focus:ring-blue-500"
+                   required>
+            <label for="terms" class="text-gray-600">
+                Принимаю <a href="#" class="text-blue-600 hover:underline">условия использования</a>
+            </label>
+        </div>
+
+        <button type="submit" class="btn-primary w-full hover:shadow-lg">
+            Продолжить
+        </button>
+
+        <!-- Разделитель -->
+        <div class="relative my-6">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-200"></div>
+            </div>
+            <div class="relative flex justify-center">
+                <span class="px-3 bg-white text-gray-500 text-sm">Уже есть аккаунт?</span>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="{% url 'login' %}" class="text-blue-600 hover:underline text-sm">
+                Войти в систему
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function togglePassword(icon) {
+        const input = icon.previousElementSibling;
+        input.type = input.type === 'password' ? 'text' : 'password';
+        icon.querySelector('svg').classList.toggle('text-blue-600');
+    }
+</script>
+{% endblock %}

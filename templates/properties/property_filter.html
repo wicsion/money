@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Фильтр объектов | RealEstatePro{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <div class="bg-white rounded-xl shadow-sm p-8 border-2 border-gray-100">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Расширенный поиск</h1>
+
+        <form method="get" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Тип недвижимости</label>
+                    {{ filter.form.property_type }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Количество комнат</label>
+                    {{ filter.form.rooms }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Минимальная цена</label>
+                    {{ filter.form.price_min }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Максимальная цена</label>
+                    {{ filter.form.price_max }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Площадь от</label>
+                    {{ filter.form.area_min }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Локация</label>
+                    {{ filter.form.location }}
+                </div>
+            </div>
+
+            <div class="border-t pt-6">
+                <div class="flex gap-4">
+                    <button type="submit" class="btn-primary flex items-center gap-2">
+                        <i class="bi bi-funnel"></i> Применить
+                    </button>
+                    <a href="{% url 'property-list' %}" class="btn-outline">
+                        <i class="bi bi-x-circle"></i> Сбросить
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .btn-primary {
+        @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors;
+    }
+    .btn-outline {
+        @apply border-2 border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors;
+    }
+    select, input {
+        @apply w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+    }
+</style>
+{% endblock %}

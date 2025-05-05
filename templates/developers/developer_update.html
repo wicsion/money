@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Редактировать застройщика - RealEstatePro{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Редактировать профиль застройщика</h1>
+<form method="post" class="bg-white p-6 rounded shadow-md space-y-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded">
+        Сохранить изменения
+    </button>
+</form>
+{% endblock %}

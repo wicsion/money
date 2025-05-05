@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Застройщики - RealEstatePro{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Список застройщиков</h1>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for developer in developers %}
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="p-6">
+            <h2 class="text-xl font-bold mb-2">{{ developer.name }}</h2>
+            <p class="text-gray-700">{{ developer.description|truncatechars:100 }}</p>
+            <a href="{% url 'developer-detail' developer.id %}" class="mt-4 inline-block text-blue-600 hover:underline">
+                Подробнее
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
