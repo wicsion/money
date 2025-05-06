@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import (LoginRequiredMixin, UserPassesTestMixin)
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django_filters.views import FilterView
-from .models import Property, PropertyImage, Favorite
+from .models import Property, PropertyImage, Favorite, PropertyType
 from .filters import PropertyFilter
 from .forms import PropertyForm, PropertyImageForm
 
@@ -163,3 +163,11 @@ class PropertyDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             self.request.user == obj.broker or
             self.request.user == obj.developer
         )
+
+class SelectPropertyTypeView(LoginRequiredMixin, View):
+    template_name = 'properties/select_property_type.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {
+            'types': PropertyType.objects.all()
+        })

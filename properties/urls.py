@@ -8,6 +8,7 @@ urlpatterns = [
     path('create/', views.PropertyCreateView.as_view(), name='property-create'),
     path('<int:pk>/update/', views.PropertyUpdateView.as_view(), name='property-update'),
     path('<int:pk>/favorite/', views.toggle_favorite, name='property-favorite'),
-    path('<int:pk>/update/', PropertyUpdateView.as_view(), name='property-update'),
     path('<int:pk>/delete/', PropertyDeleteView.as_view(), name='property-delete'),
+    path('create/select-type/', views.SelectPropertyTypeView.as_view(), name='select-property-type'),
+
 ]

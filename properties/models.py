@@ -1,20 +1,20 @@
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
 
 class PropertyType(models.Model):
-    """Типы недвижимости"""
     name = models.CharField(
-        max_length=100,
-        choices=[
-            ('new_flat', 'Квартира в новостройке'),
-            ('resale_flat', 'Квартира на вторичке'),
-            ('commercial', 'Нежилое помещение'),
-            ('house', 'Дом'),
-        ],
-        unique=True,
-        verbose_name=_('Тип объекта')
+            max_length=100,
+            choices=[
+                ('new_flat', 'Квартира в новостройке'),
+                ('resale_flat', 'Квартира на вторичке'),
+                ('commercial', 'Нежилое помещение'),
+                ('house', 'Дом')  # Добавлен новый тип
+            ],
+            unique=True,
+            verbose_name='Тип объекта'
     )
     description = models.TextField(
         blank=True,
@@ -45,6 +45,7 @@ class Property(models.Model):
 
     title = models.CharField(
         max_length=200,
+        blank=True,
         verbose_name=_('Заголовок')
     )
     description = models.TextField(
@@ -122,13 +123,15 @@ class Property(models.Model):
         verbose_name=_('Одобрено')
     )
     floor = models.PositiveIntegerField(
-        blank=True,
+        verbose_name=_('Этаж'),  # Убраны blank=True и null=True
+        blank=True,  # Добавлено
         null=True,
-        verbose_name=_('Этаж')
+        validators=[MinValueValidator(1)]  # Добавлена валидация
     )
     apartment_type = models.CharField(
         max_length=20,
         blank=True,
+        null=True,
         choices=[
             ('studio', 'Студия'),
             ('apartment', 'Апартаменты'),
@@ -159,11 +162,12 @@ class Property(models.Model):
                 'apartment': 'Апартаменты',
                 'regular': f'{self.rooms}-к. квартира'
             }
-            self.title = f"{type_map[self.apartment_type]}, {self.area} м², {self.floor} этаж"
+            self.title = f"{type_map.get(self.apartment_type, 'Квартира')}, {self.area} м², {self.floor} этаж"
         elif self.property_type.name == 'house':
             self.title = f"Дом, {self.area} м²"
         else:
-            self.title = f"{self.property_type.name}, {self.area} м²"
+            # Используем get_name_display() из PropertyType
+            self.title = f"{self.property_type.get_name_display()}, {self.area} м²"
 
         super().save(*args, **kwargs)
 

@@ -103,10 +103,7 @@
         <div class="row g-4 mb-4">
             <!-- Левая колонка -->
             <div class="col-md-6">
-                <div class="mb-4">
-                    <label class="form-label">Название объекта</label>
-                    {% render_field form.title class+="custom-input" %}
-                </div>
+
 
                 <div class="mb-4">
                     <label class="form-label">Описание</label>
@@ -146,10 +143,8 @@
                         <label class="form-label">Площадь (м²)</label>
                         {% render_field form.area class+="custom-input" %}
                     </div>
-                    <div class="col-12" id="apartment-type-field">
-    <label class="form-label">Тип квартиры</label>
-    {% render_field form.apartment_type class+="custom-input" %}
-</div>
+
+
                     <div class="col-12" id="floor-field">
     <label class="form-label">Этаж</label>
     {% render_field form.floor class+="custom-input" %}
@@ -160,6 +155,7 @@
                         {% render_field form.rooms class+="custom-input" %}
                     </div>
                     <div class="col-6">
+
                         <label class="form-label">Тип объекта</label>
                         {% render_field form.property_type class+="custom-input" %}
                     </div>
@@ -187,6 +183,7 @@
         </div>
     </form>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const propertyType = document.getElementById('id_property_type');
@@ -194,13 +191,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const floorField = document.getElementById('floor-field');
 
     function toggleFields() {
-        const isFlat = ['new_flat', 'resale_flat'].includes(propertyType.value);
+        const selectedValue = propertyType.value;
+        const isFlat = ['new_flat', 'resale_flat'].includes(selectedValue);
+
+        // Управление видимостью
         apartmentTypeField.style.display = isFlat ? 'block' : 'none';
-        floorField.style.display = isFlat ? 'block' : 'none';
-        if (isFlat) {
-            apartmentTypeField.querySelector('select').required = true;
-            floorField.querySelector('input').required = true;
-        }
+        floorField.style.display = 'block';
+
+        // Устанавливаем обязательность полей
+        document.getElementById('id_floor').required = isFlat;
+        document.getElementById('id_apartment_type').required = false; // Явно указываем необязательность
     }
 
     propertyType.addEventListener('change', toggleFields);

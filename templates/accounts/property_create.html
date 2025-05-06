@@ -74,18 +74,19 @@
 <div class="creation-form">
     <h1 class="form-title text-center mb-5">🏠 Добавить новый объект</h1>
 
-     <form method="post" enctype="multipart/form-data" class="space-y-6">
-         {% csrf_token %}
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
 
-         {{ form.status }}
-    {{ form.broker }}
-    {{ form.developer }}
-    {{ form.is_premium }}
+        <!-- Скрытые поля формы -->
+        {{ form.status }}
+        {{ form.broker }}
+        {{ form.developer }}
+        {{ form.is_premium }}
 
-    {# Блок с ошибками #}
-    {% if form.errors %}
-    <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
-            Исправьте ошибки:
+        <!-- Блок с ошибками -->
+        {% if form.errors %}
+        <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
+            <span>Исправьте ошибки:</span>
             <ul class="mt-2 list-disc list-inside">
                 {% for field, errors in form.errors.items %}
                     {% for error in errors %}
@@ -100,33 +101,28 @@
             <!-- Левая колонка -->
             <div class="col-md-6">
                 <div class="mb-4">
-                    <label class="form-label">Название объекта</label>
-                    {% render_field form.title class+="custom-input" %}
-                </div>
-
-                <div class="mb-4">
                     <label class="form-label">Описание</label>
                     {% render_field form.description class+="custom-input" rows="4" %}
                 </div>
 
                 <div class="mb-4">
-        <label class="form-label">Основное фото</label>
-        {% render_field form.main_image class+="custom-input" %}
-    </div>
+                    <label class="form-label">Основное фото</label>
+                    {% render_field form.main_image class+="custom-input" %}
+                </div>
 
-    <!-- Добавленное поле для дополнительных фото -->
-    <div class="mb-4">
-        <label class="form-label">Дополнительные фото (до 10)</label>
-        <input
-            type="file"
-            name="images"
-            class="custom-input"
-            multiple
-            accept="image/*"
-        >
-        <small class="text-gray-500">Удерживайте Ctrl для выбора нескольких файлов</small>
-    </div>
-</div>
+                <div class="mb-4">
+                    <label class="form-label">Дополнительные фото (до 10)</label>
+                    <input
+                        type="file"
+                        name="images"
+                        class="custom-input"
+                        multiple
+                        accept="image/*"
+                    >
+                    <small class="text-gray-500">Удерживайте Ctrl для выбора нескольких файлов</small>
+                </div>
+            </div> <!-- Закрытие левой колонки -->
+
             <!-- Правая колонка -->
             <div class="col-md-6">
                 <div class="row g-3">
@@ -137,6 +133,11 @@
                     <div class="col-6">
                         <label class="form-label">Площадь (м²)</label>
                         {% render_field form.area class+="custom-input" %}
+                    </div>
+
+                    <div class="col-12" id="floor-field">
+                        <label class="form-label">Этаж</label>
+                        {% render_field form.floor class+="custom-input" %}
                     </div>
 
                     <div class="col-6">
@@ -153,15 +154,22 @@
                         {% render_field form.address class+="custom-input" %}
                     </div>
 
-                    <!-- Добавлено поле "Расположение" -->
                     <div class="col-12">
-                        <label class="form-label">Расположение (Город,область)</label>
+                        <label class="form-label">Расположение (Город, область)</label>
                         {% render_field form.location class+="custom-input" %}
                     </div>
-                </div>
-            </div>
-        </div>
 
+                    <!-- Поле "Тип квартиры" -->
+                    <div class="col-12" id="apartment-type-field">
+                        <label class="form-label">Тип квартиры</label>
+                        {% render_field form.apartment_type class+="custom-input" %}
+                        <small class="text-gray-500">Необязательное поле</small>
+                    </div>
+                </div> <!-- Закрытие row g-3 -->
+            </div> <!-- Закрытие правой колонки -->
+        </div> <!-- Закрытие row g-4 -->
+
+        <!-- Кнопки отправки -->
         <div class="d-flex gap-3 justify-content-end mt-5">
             <a href="{% url 'property-list' %}" class="btn-outline">
                 <i class="bi bi-x-lg me-2"></i>Отмена
@@ -180,17 +188,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const floorField = document.getElementById('floor-field');
 
     function toggleFields() {
-        const isFlat = ['new_flat', 'resale_flat'].includes(propertyType.value);
+        const selectedValue = propertyType.value;
+        const isFlat = ['new_flat', 'resale_flat'].includes(selectedValue);
+
+        // Управление видимостью поля "Тип квартиры"
         apartmentTypeField.style.display = isFlat ? 'block' : 'none';
-        floorField.style.display = isFlat ? 'block' : 'none';
-        if (isFlat) {
-            apartmentTypeField.querySelector('select').required = true;
-            floorField.querySelector('input').required = true;
-        }
+
+        // Обязательность поля "Этаж" для квартир
+        document.getElementById('id_floor').required = isFlat;
     }
 
-    propertyType.addEventListener('change', toggleFields);
+    // Инициализация при загрузке
     toggleFields();
+    propertyType.addEventListener('change', toggleFields);
 });
 </script>
 {% endblock %}
