@@ -47,63 +47,64 @@ class PropertyDetailView(DetailView):
 class PropertyCreateView(LoginRequiredMixin, CreateView):
     model = Property
     form_class = PropertyForm
-    template_name = 'properties/property_form.html'
-    success_url = reverse_lazy('property-list')  # Или ваш URL
+    template_name = 'properties/property_create_form.html'
+    success_url = reverse_lazy('dashboard')
 
     def get_context_data(self, **kwargs):
         """Добавляем форму для изображений в контекст"""
         context = super().get_context_data(**kwargs)
         context['max_images'] = 10  # Для отображения ограничения в шаблоне
+        property_type = get_object_or_404(PropertyType, name=self.kwargs['property_type'])
+        context['property_type_name'] = property_type.get_name_display()
+        context['show_apartment_fields'] = property_type.name in ['new_flat', 'resale_flat']
         return context
 
     def form_valid(self, form):
-        """Обработка основной формы и изображений"""
-        # Сохраняем объект Property
-        self.object = form.save(commit=False)
-        self.object.status = 'active'
-        self.object.is_premium = False
-
-        # Определяем создателя
-        if self.request.user.user_type == 'broker':
-            self.object.broker = self.request.user
-        elif self.request.user.user_type == 'developer':
-            self.object.developer = self.request.user
-
-        self.object.save()
-
-        # Обработка изображений
+        form.instance.property_type = get_object_or_404(
+            PropertyType,
+            name=self.kwargs['property_type']
+        )
+        form.instance.broker = self.request.user
+        form.instance.is_approved = False
+        self.object = form.save()
         images = self.request.FILES.getlist('images')
+
         if len(images) > 10:
             form.add_error(None, "Максимальное количество фото - 10")
             return self.form_invalid(form)
 
         for img in images:
-            PropertyImage.objects.create(
-                property=self.object,
-                image=img
-            )
+            PropertyImage.objects.create(property=self.object, image=img)
 
         return super().form_valid(form)
 
-    def form_invalid(self, form):
-        """Добавляем контекст для отображения ошибок"""
-        return self.render_to_response(
-            self.get_context_data(form=form, images_error=form.errors)
+
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['property_type'] = get_object_or_404(
+            PropertyType,
+            name=self.kwargs['property_type']
         )
+        return kwargs
+
+
+    def form_invalid(self, form):
+     """Добавляем контекст для отображения ошибок"""
+     return self.render_to_response(
+        self.get_context_data(form=form, images_error=form.errors)
+    )
 
 
 class PropertyUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Property
     form_class = PropertyForm
-    template_name = 'properties/property_form.html'
+    template_name = 'properties/property_create_form.html'
 
     def test_func(self):
         obj = self.get_object()
 
-        return (
-            self.request.user == obj.broker or
-            self.request.user == obj.developer
-        )
+        return self.request.user == self.get_object().broker
 
 
     def form_valid(self, form):

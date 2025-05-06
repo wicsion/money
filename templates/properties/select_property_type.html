@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    /* Стили для индикатора этапов (скопированы из property_create_form.html) */
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .step-badge {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    .step-active {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .step-inactive {
+        background: #e5e7eb;
+        color: #6b7280;
+    }
+
+    .type-card {
+        transition: all 0.3s ease;
+        border: 2px solid #e5e7eb;
+        border-radius: 1rem;
+        overflow: hidden;
+        background: white;
+        position: relative;
+    }
+
+    .type-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        border-color: #3b82f6;
+    }
+
+    .type-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: #3b82f6;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .type-card:hover::after {
+        opacity: 1;
+    }
+
+    .type-icon {
+        font-size: 2.5rem;
+        color: #3b82f6;
+        margin-bottom: 1rem;
+    }
+
+    .type-title {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 1.25rem;
+    }
+
+    .type-description {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+      .selection-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .selection-title::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 3px;
+        background: #3b82f6;
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+    }
+</style>
+
+<div class="container my-5">
+    <!-- Индикатор этапов -->
+    <div class="creation-stepper mb-5">
+        <div class="step-indicator">
+            <div class="step-badge step-active">1</div>
+            <span class="text-blue-600 font-semibold">Выбор типа</span>
+            <div class="flex-1 border-t-2 border-dashed mx-2"></div>
+            <div class="step-badge step-inactive">2</div>
+            <span class="text-gray-500">Детали объекта</span>
+        </div>
+    </div>
+
+
+    <h2 class="selection-title">Выберите тип недвижимости</h2>
+    <!-- Карточки типов -->
+    <div class="row g-4">
+        {% for type in types %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <a href="{% url 'property-create' type.name %}" class="text-decoration-none">
+                <div class="type-card h-100 p-4 text-center">
+                    <div class="type-icon">
+                        <i class="fas fa-{{ type.icon }}"></i>
+                    </div>
+                    <h3 class="type-title mb-2">{{ type.get_name_display }}</h3>
+                    <p class="type-description">
+                        {% if type.name == 'new_flat' %}
+                            Квартиры в новостройках с отделкой
+                        {% elif type.name == 'resale_flat' %}
+                            Вторичное жилье с историей
+                        {% elif type.name == 'commercial' %}
+                            Помещения для бизнеса
+                        {% else %}
+                            Частные дома и коттеджи
+                        {% endif %}
+                    </p>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

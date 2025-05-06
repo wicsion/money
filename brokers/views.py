@@ -26,7 +26,7 @@ class BrokerPropertyListView(LoginRequiredMixin, ListView):
 class PropertyCreateWithSubscriptionCheck(LoginRequiredMixin, CreateView):
     model = Property
     form_class = PropertyForm
-    template_name = 'properties/property_form.html'
+    template_name = 'properties/property_create_form.html'
 
     def form_valid(self, form):
         if self.request.user.user_type == 'broker':

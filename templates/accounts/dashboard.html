@@ -385,10 +385,10 @@
                             <i class="fas fa-home text-green-500/80"></i>
                             Ваши объекты
                         </h3>
-                        <a href="{% url 'create_property' %}" class="btn-custom">
-                            <i class="fas fa-plus"></i>
-                            Добавить
-                        </a>
+                       <a href="{% url 'select-property-type' %}" class="btn-custom">
+    <i class="fas fa-plus"></i>
+    Добавить
+</a>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
@@ -400,9 +400,9 @@
                                         <h4 class="text-base lg:text-lg font-bold text-gray-800">🏢 {{ prop.title }}</h4>
                                         <p class="text-xs lg:text-sm text-gray-600">{{ prop.get_property_type_display }}</p>
                                     </div>
-                                    <span class="badge-status {% if prop.is_approved %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %} mt-2 sm:mt-0">
-                                        {{ prop.is_approved|yesno:"Одобрен,На модерации" }}
-                                    </span>
+                                    <span class="badge-status {% if prop.is_approved %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+    {{ prop.is_approved|yesno:"Одобрен,На модерации" }}
+</span>
                                 </div>
 
                                 <div class="flex items-center gap-2 lg:gap-3 text-xs lg:text-sm text-gray-600 mb-4">
@@ -446,7 +446,7 @@
                                 <i class="fas fa-box-open text-2xl lg:text-3xl text-blue-600"></i>
                             </div>
                             <h4 class="text-gray-600 text-sm lg:text-base mb-4">Нет добавленных объектов</h4>
-                            <a href="{% url 'create_property' %}" class="btn-custom">
+                            <a href="{% url 'select-property-type' %}" class="btn-custom">
                                 Создать первый объект
                             </a>
                         </div>

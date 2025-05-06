@@ -177,16 +177,14 @@ def dashboard_view(request):
 
     # Данные по ролям
     if user.user_type == User.UserType.BROKER:
-        if user.user_type == User.UserType.BROKER:
-            context.update({
-                'my_properties': Property.objects.filter(broker=user),
-                'all_requests': user.accounts_received_requests.all().order_by('-created_at'),
-                'active_requests_count': user.accounts_received_requests.filter(status='in_progress').count()
-            })
+        context.update({
+            'my_properties': Property.objects.filter(broker=user),  # Убрана фильтрация по is_approved
+            'all_requests': user.accounts_received_requests.all().order_by('-created_at'),
+            'active_requests_count': user.accounts_received_requests.filter(status='in_progress').count()
+        })
     elif user.user_type == User.UserType.DEVELOPER:
         context['developer_properties'] = user.created_properties.filter(is_approved=True)
     elif user.user_type == User.UserType.CLIENT:
-        # Фильтрация данных для клиента
         if active_tab == 'properties':
             context['favorite_properties'] = user.account_favorites.filter(property__isnull=False)
         else:
@@ -199,7 +197,6 @@ def dashboard_view(request):
         })
 
     return render(request, 'accounts/dashboard.html', context)
-
 
 def invalid_token_view(request):
     return render(request, 'accounts/invalid_token.html')

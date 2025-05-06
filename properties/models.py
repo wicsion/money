@@ -22,8 +22,13 @@ class PropertyType(models.Model):
     )
     icon = models.CharField(
         max_length=50,
-        blank=True,
-        help_text=_('Название иконки из FontAwesome')
+        default='home',
+        choices=[
+            ('building', 'Здание'),
+            ('home', 'Дом'),
+            ('warehouse', 'Склад'),
+            ('city', 'Город')
+        ]
     )
 
     class Meta:
@@ -64,7 +69,8 @@ class Property(models.Model):
     area = models.DecimalField(
         max_digits=8,
         decimal_places=2,
-        verbose_name=_('Площадь (м²)')
+        default=0.00,
+    verbose_name=_('Площадь (м²)')
     )
     rooms = models.PositiveIntegerField(
         verbose_name=_('Количество комнат')
@@ -128,6 +134,12 @@ class Property(models.Model):
         null=True,
         validators=[MinValueValidator(1)]  # Добавлена валидация
     )
+    total_floors = models.PositiveIntegerField(
+        verbose_name=_('Всего этажей в доме'),
+        validators=[MinValueValidator(1)],
+        null=True,
+        blank=True
+    )
     apartment_type = models.CharField(
         max_length=20,
         blank=True,
@@ -138,6 +150,38 @@ class Property(models.Model):
             ('regular', 'Обычная квартира'),
         ],
         verbose_name=_('Тип квартиры')
+    )
+
+    has_finishing = models.BooleanField(
+        verbose_name='Отделка',
+        default=False
+    )
+    delivery_year = models.PositiveIntegerField(
+        verbose_name='Год сдачи',
+        null=True,
+        blank=True
+    )
+    is_delivered = models.BooleanField(
+        verbose_name='Дом сдан',
+        default=False
+    )
+    living_area = models.DecimalField(
+        verbose_name='Жилая площадь (м²)',
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+    total_area = models.DecimalField(
+        verbose_name='Общая площадь (м²)',
+        max_digits=8,
+        decimal_places=2,
+        default=0.00
+    )
+    metro_station = models.CharField(
+        verbose_name='Станция метро',
+        max_length=100,
+        blank=True
     )
     class Meta:
         verbose_name = _('Объект недвижимости')
@@ -162,11 +206,17 @@ class Property(models.Model):
                 'apartment': 'Апартаменты',
                 'regular': f'{self.rooms}-к. квартира'
             }
-            self.title = f"{type_map.get(self.apartment_type, 'Квартира')}, {self.area} м², {self.floor} этаж"
+
+            # Формируем информацию о этажах
+            floor_info = str(self.floor)  # Базовый этаж
+            if self.total_floors:
+                floor_info = f"{self.floor}/{self.total_floors}"  # Добавляем общее количество этажей
+
+            self.title = f"{type_map.get(self.apartment_type, 'Квартира')}, {self.area} м², {floor_info} этаж"
+
         elif self.property_type.name == 'house':
             self.title = f"Дом, {self.area} м²"
         else:
-            # Используем get_name_display() из PropertyType
             self.title = f"{self.property_type.get_name_display()}, {self.area} м²"
 
         super().save(*args, **kwargs)
