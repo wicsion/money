@@ -3,114 +3,408 @@
 {% block title %}{{ property.title }} | RealEstatePro{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css">
+<style>
+    /* Карусель */
+    .swiper {
+        width: 100%;
+        height: 300px; /* Мобильная версия */
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: height 0.3s ease;
+    }
+
+    @media (min-width: 768px) {
+        .swiper {
+            height: 500px; /* Десктопная версия */
+        }
+    }
+
+    .swiper-slide {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: zoom-in;
+        transition: transform 0.3s;
+    }
+
+    .swiper-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Навигация карусели */
+    .swiper-button-next,
+    .swiper-button-prev {
+        color: white;
+        background: rgba(0,0,0,0.3);
+        width: 30px; /* Уменьшено для мобилок */
+        height: 30px;
+        border-radius: 50%;
+        backdrop-filter: blur(4px);
+    }
+
+    @media (min-width: 768px) {
+        .swiper-button-next,
+        .swiper-button-prev {
+            width: 40px; /* Оригинальный размер */
+            height: 40px;
+        }
+    }
+
+    .swiper-button-next:after,
+    .swiper-button-prev:after {
+        font-size: 1.2rem; /* Уменьшено для мобилок */
+    }
+
+    @media (min-width: 768px) {
+        .swiper-button-next:after,
+        .swiper-button-prev:after {
+            font-size: 1.5rem; /* Оригинальный размер */
+        }
+    }
+
+    /* Модальное окно */
+    .image-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.95);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 15px; /* Уменьшено для мобилок */
+        right: 20px;
+        color: white;
+        font-size: 30px; /* Уменьшено для мобилок */
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+
+    @media (min-width: 768px) {
+        .close-modal {
+            top: 25px; /* Оригинальный размер */
+            right: 35px;
+            font-size: 40px;
+        }
+    }
+
+    /* Анимации */
+    @keyframes zoomIn {
+        from {transform: scale(0.9); opacity: 0;}
+        to {transform: scale(1); opacity: 1;}
+    }
+
+    .modal-opened {
+        animation: zoomIn 0.3s ease-out;
+    }
+
+    /* Описание со скроллом */
+    .scrollable-description {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .scrollable-description::-webkit-scrollbar {
+        width: 4px; /* Уменьшено для мобилок */
+    }
+
+    @media (min-width: 768px) {
+        .scrollable-description::-webkit-scrollbar {
+            width: 6px; /* Оригинальный размер */
+        }
+    }
+
+    .scrollable-description::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .scrollable-description::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+
+    /* Боковая панель */
+    .contact-sidebar {
+        height: fit-content;
+        max-height: 500px;
+        position: sticky;
+        top: 20px;
+        padding: 1rem; /* Добавлено для мобилок */
+    }
+
+    @media (max-width: 767px) {
+        .contact-sidebar {
+            margin-top: 2rem; /* Отступ на мобилках */
+            position: static; /* Убираем sticky */
+        }
+    }
+
+    /* Кнопки */
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border: 2px solid transparent;
+        padding: 0.6rem 1.5rem; /* Уменьшено для мобилок */
+        font-size: 0.9rem;
+    }
+
+    .btn-outline {
+        border: 2px solid #e5e7eb;
+        color: #34495e;
+        padding: 0.6rem 1.5rem; /* Уменьшено для мобилок */
+        font-size: 0.9rem;
+    }
+
+    @media (min-width: 768px) {
+        .btn-primary,
+        .btn-outline {
+            padding: 0.75rem 2rem; /* Оригинальный размер */
+            font-size: 1rem;
+        }
+    }
+
+    .btn-primary:hover {
+        background: #2563eb;
+    }
+
+    .btn-outline:hover {
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+    /* Адаптивная сетка параметров */
+    .params-grid {
+        grid-template-columns: repeat(1, 1fr); /* Мобильная версия */
+        gap: 0.5rem;
+    }
+
+    @media (min-width: 640px) {
+        .params-grid {
+            grid-template-columns: repeat(2, 1fr); /* Планшеты */
+        }
+    }
+
+    @media (min-width: 768px) {
+        .params-grid {
+            grid-template-columns: repeat(3, 1fr); /* Десктоп */
+            gap: 1rem;
+        }
+    }
+
+    /* Адаптивные тексты */
+    .mobile-text-xl {
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+    }
+
+    @media (min-width: 768px) {
+        .mobile-text-xl {
+            font-size: 1.875rem;
+            line-height: 2.25rem;
+        }
+    }
+</style>
+
 <div class="registration-container">
-    <div class="bg-white rounded-xl shadow-sm p-8 border-2 border-gray-100">
-        <!-- Галерея -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="col-span-1">
-                <img src="{{ property.main_image.url }}"
-                     class="w-full h-96 object-cover rounded-xl"
-                     alt="{{ property.title }}">
-            </div>
-            <div class="grid grid-cols-2 gap-4">
+    <div class="bg-white rounded-xl shadow-sm p-4 md:p-8 border-2 border-gray-100">
+        <!-- Карусель -->
+        <div class="swiper mb-6 md:mb-8">
+            <div class="swiper-wrapper">
+                <!-- Основное фото -->
+                <div class="swiper-slide">
+                    <img src="{{ property.main_image.url }}"
+                         alt="{{ property.title }}"
+                         loading="lazy">
+                </div>
+
+                <!-- Дополнительные фото -->
                 {% for image in property.images.all %}
-                <img src="{{ image.image.url }}"
-                     class="h-48 object-cover rounded-lg"
-                     alt="Фото объекта">
+                <div class="swiper-slide">
+                    <img src="{{ image.image.url }}"
+                         alt="Фото объекта {{ forloop.counter }}"
+                         loading="lazy">
+                </div>
                 {% endfor %}
             </div>
+
+            <!-- Элементы управления -->
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+
+        <!-- Модальное окно -->
+        <div id="imageModal" class="image-modal">
+            <span class="close-modal">&times;</span>
+            <img class="modal-content" id="expandedImg">
         </div>
 
         <!-- Основная информация -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+         <!-- Основная информация -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+            <!-- Левая колонка -->
             <div class="lg:col-span-2">
-                <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ property.title }}</h1>
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="text-2xl font-bold text-blue-600">{{ property.price|floatformat:"0" }} ₽</span>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">{{ property.title }}</h1>
+
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 mb-4 md:mb-6">
+                    <span class="text-xl md:text-2xl font-bold text-blue-600">Цена: {{ property.price|floatformat:"0" }} ₽</span>
                     {% if property.is_featured %}
-                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
+                    <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-sm">
                         ★ Premium
                     </span>
                     {% endif %}
                 </div>
 
-                <div class="prose max-w-none mb-8">
-                    {{ property.description|linebreaks }}
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                <!-- Параметры -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-8 params-grid">
+                    <div class="bg-gray-50 p-3 md:p-4 rounded-lg">
+                        <div class="text-xs md:text-sm text-gray-500">Площадь</div>
+                        <div class="text-lg md:text-xl font-bold">{{ property.area }} м²</div>
+                    </div>
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="text-sm text-gray-500">Комнат</div>
                         <div class="text-xl font-bold">{{ property.rooms }}</div>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <div class="text-sm text-gray-500">Площадь</div>
-                        <div class="text-xl font-bold">{{ property.area }} м²</div>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="text-sm text-gray-500">Этаж</div>
                         <div class="text-xl font-bold">{{ property.floor }}</div>
                     </div>
                 </div>
+
+                <!-- Описание объекта -->
+                 <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">Описание</h2>
+                <div class="scrollable-description prose max-w-none text-sm md:text-base">
+                    {{ property.description|linebreaks }}
+                </div>
             </div>
 
-            <!-- Боковая панель -->
-            <div class="bg-gray-50 p-6 rounded-xl">
-                <div class="mb-6">
-                    <h3 class="text-lg font-bold mb-4">Контактная информация</h3>
-                    <div class="flex items-center gap-4 mb-4">
+            <!-- Правая колонка -->
+            <div class="contact-sidebar bg-gray-50 p-4 md:p-6 rounded-xl mt-6 md:mt-0">
+                <div class="contact-content">
+                    <div class="mb-4 md:mb-6">
+                        <h3 class="text-lg md:text-xl font-bold">Контактная информация</h3>
+                    </div>
+
+                    <div class="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                         {% if property.broker.avatar %}
                         <img src="{{ property.broker.avatar.url }}"
-                             class="w-16 h-16 rounded-full object-cover">
+                             class="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover">
                         {% else %}
-                        <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-                            <i class="bi bi-person text-2xl text-blue-600"></i>
+                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="bi bi-person text-xl md:text-2xl text-blue-600"></i>
                         </div>
                         {% endif %}
                         <div>
-                            <div class="font-medium">{{ property.broker.get_full_name }}</div>
-                            <div class="text-sm text-gray-500">Лицензированный риелтор</div>
+                            <div class="font-medium text-base md:text-lg">{{ property.broker.get_full_name }}</div>
+                            <div class="text-xs md:text-sm text-gray-500">Лицензированный риелтор</div>
                         </div>
                     </div>
-                    <div class="space-y-2">
+
+                    <div class="space-y-2 text-sm md:text-base">
                         <div class="flex items-center gap-2">
-                            <i class="bi bi-telephone text-blue-600"></i>
+                            <i class="bi bi-telephone text-blue-600 text-lg"></i>
                             <a href="tel:{{ property.broker.phone }}" class="hover:text-blue-600">
                                 {{ property.broker.phone|default:"Не указан" }}
                             </a>
                         </div>
                         <div class="flex items-center gap-2">
-                            <i class="bi bi-envelope text-blue-600"></i>
+                            <i class="bi bi-envelope text-blue-600 text-lg"></i>
                             <a href="mailto:{{ property.broker.email }}" class="hover:text-blue-600">
                                 {{ property.broker.email }}
                             </a>
                         </div>
                     </div>
-                </div>
 
-                {% if user.is_authenticated %}
-                <div class="space-y-2">
-                    <button class="btn-primary w-full toggle-favorite" data-property-id="{{ property.id }}">
-                        <i class="bi bi-heart{% if property in user.favorites.all %}-fill{% endif %}"></i>
-                        {{ property|yesno:"Удалить из избранного,Добавить в избранное" }}
-                    </button>
-                    <a href="{% url 'contact_broker' property.broker.id %}"
-                       class="btn-outline block text-center">
-                        <i class="bi bi-chat-left-text"></i> Написать
-                    </a>
+                    {% if user.is_authenticated %}
+                    <div class="mt-6 md:mt-8 space-y-2">
+                        <a href="{% url 'contact_broker' property.broker.id %}"
+                           class="btn-primary hover:bg-blue-700 transition-colors">
+                            <i class="bi bi-chat-left-text"></i> Написать
+                        </a>
+
+                        <button class="btn-outline toggle-favorite hover:border-blue-600 hover:text-blue-600">
+                            <i class="bi bi-heart{% if property in user.favorites.all %}-fill{% endif %}"></i>
+                            <span class="hidden md:inline">{{ property|yesno:"Удалить из избранного,Добавить в избранное" }}</span>
+                            <span class="md:hidden">{{ property|yesno:"Удалить,Добавить" }}</span>
+                        </button>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    .btn-primary {
-        @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2;
-    }
-    .btn-outline {
-        @apply border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2;
-    }
-</style>
+<script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
+<script>
+    // Инициализация карусели
+    const swiper = new Swiper('.swiper', {
+        loop: true,
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        keyboard: {
+            enabled: true,
+        },
+        effect: 'slide',
+        speed: 500,
+    });
+
+    // Работа с модальным окном
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('expandedImg');
+    const closeBtn = document.querySelector('.close-modal');
+
+    // Открытие модального окна
+    document.querySelectorAll('.swiper-slide img').forEach(img => {
+        img.addEventListener('click', () => {
+            modal.style.display = 'flex';
+            modalImg.src = img.src;
+            modalImg.classList.add('modal-opened');
+        });
+    });
+
+    // Закрытие модального окна
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+        modalImg.classList.remove('modal-opened');
+    });
+
+    // Закрытие по клику вне изображения
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            modalImg.classList.remove('modal-opened');
+        }
+    });
+
+    // Закрытие по Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+            modal.style.display = 'none';
+            modalImg.classList.remove('modal-opened');
+        }
+    });
+</script>
 {% endblock %}

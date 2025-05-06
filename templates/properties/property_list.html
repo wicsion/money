@@ -43,7 +43,15 @@
             </div>
 
             <div class="space-y-4">
-                <h3 class="text-xl font-bold text-gray-800 truncate">{{ property.title }}</h3>
+                <h3 class="text-xl font-bold text-gray-800 truncate">
+    {% if property.property_type.name == 'house' %}
+        🏠 {{ property.title }}
+    {% elif 'flat' in property.property_type.name %}
+        🏢 {{ property.title }}
+    {% else %}
+        🏭 {{ property.title }}
+    {% endif %}
+</h3>
 
                 <div class="flex items-center gap-2 text-blue-600">
                     <i class="bi bi-geo-alt"></i>

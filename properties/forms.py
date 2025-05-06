@@ -6,13 +6,15 @@ class PropertyForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['status'].initial = 'active'  # Установите значение по умолчанию
         self.fields['is_premium'].initial = False
+        self.fields['apartment_type'].required = False
 
     class Meta:
         model = Property
         fields = [
             'title', 'description', 'price', 'property_type',
             'status', 'broker', 'developer', 'is_premium',
-            'main_image', 'area', 'rooms', 'location', 'address'
+            'main_image', 'area', 'rooms', 'location', 'address','apartment_type',
+            'floor'
         ]
         widgets = {
             'status': forms.HiddenInput(),  # Скрываем ненужные поля
@@ -23,6 +25,7 @@ class PropertyForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4}),
             'address': forms.Textarea(attrs={'rows': 2}),
         }
+
 
 class PropertyImageForm(forms.ModelForm):
     images = forms.FileField(

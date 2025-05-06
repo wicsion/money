@@ -7,8 +7,14 @@ class PropertyType(models.Model):
     """Типы недвижимости"""
     name = models.CharField(
         max_length=100,
+        choices=[
+            ('new_flat', 'Квартира в новостройке'),
+            ('resale_flat', 'Квартира на вторичке'),
+            ('commercial', 'Нежилое помещение'),
+            ('house', 'Дом'),
+        ],
         unique=True,
-        verbose_name=_('Название')
+        verbose_name=_('Тип объекта')
     )
     description = models.TextField(
         blank=True,
@@ -115,7 +121,21 @@ class Property(models.Model):
         default=False,
         verbose_name=_('Одобрено')
     )
-
+    floor = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_('Этаж')
+    )
+    apartment_type = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=[
+            ('studio', 'Студия'),
+            ('apartment', 'Апартаменты'),
+            ('regular', 'Обычная квартира'),
+        ],
+        verbose_name=_('Тип квартиры')
+    )
     class Meta:
         verbose_name = _('Объект недвижимости')
         verbose_name_plural = _('Объекты недвижимости')
@@ -131,6 +151,21 @@ class Property(models.Model):
             'archived': 'gray'
         }
         return colors.get(self.status, 'blue')
+
+    def save(self, *args, **kwargs):
+        if self.property_type.name in ['new_flat', 'resale_flat']:
+            type_map = {
+                'studio': 'Студия',
+                'apartment': 'Апартаменты',
+                'regular': f'{self.rooms}-к. квартира'
+            }
+            self.title = f"{type_map[self.apartment_type]}, {self.area} м², {self.floor} этаж"
+        elif self.property_type.name == 'house':
+            self.title = f"Дом, {self.area} м²"
+        else:
+            self.title = f"{self.property_type.name}, {self.area} м²"
+
+        super().save(*args, **kwargs)
 
 
 class PropertyImage(models.Model):

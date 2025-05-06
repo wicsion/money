@@ -110,11 +110,23 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label">Основное фото</label>
-                    {% render_field form.main_image class+="custom-input" %} <!-- Исправлено -->
-                </div>
-            </div>
+        <label class="form-label">Основное фото</label>
+        {% render_field form.main_image class+="custom-input" %}
+    </div>
 
+    <!-- Добавленное поле для дополнительных фото -->
+    <div class="mb-4">
+        <label class="form-label">Дополнительные фото (до 10)</label>
+        <input
+            type="file"
+            name="images"
+            class="custom-input"
+            multiple
+            accept="image/*"
+        >
+        <small class="text-gray-500">Удерживайте Ctrl для выбора нескольких файлов</small>
+    </div>
+</div>
             <!-- Правая колонка -->
             <div class="col-md-6">
                 <div class="row g-3">
@@ -160,4 +172,25 @@
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const propertyType = document.getElementById('id_property_type');
+    const apartmentTypeField = document.getElementById('apartment-type-field');
+    const floorField = document.getElementById('floor-field');
+
+    function toggleFields() {
+        const isFlat = ['new_flat', 'resale_flat'].includes(propertyType.value);
+        apartmentTypeField.style.display = isFlat ? 'block' : 'none';
+        floorField.style.display = isFlat ? 'block' : 'none';
+        if (isFlat) {
+            apartmentTypeField.querySelector('select').required = true;
+            floorField.querySelector('input').required = true;
+        }
+    }
+
+    propertyType.addEventListener('change', toggleFields);
+    toggleFields();
+});
+</script>
 {% endblock %}

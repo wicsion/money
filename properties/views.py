@@ -105,6 +105,25 @@ class PropertyUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             self.request.user == obj.developer
         )
 
+
+    def form_valid(self, form):
+        # Сохраняем объект
+        self.object = form.save()
+
+        # Обработка новых изображений
+        images = self.request.FILES.getlist('images')
+        if len(images) + self.object.images.count() > 10:
+            form.add_error(None, "Максимальное количество фото - 10")
+            return self.form_invalid(form)
+
+        for img in images:
+            PropertyImage.objects.create(
+                property=self.object,
+                image=img
+            )
+
+        return super().form_valid(form)
+
     def get_success_url(self):
         return reverse_lazy('property-detail', kwargs={'pk': self.object.pk})
 

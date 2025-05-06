@@ -124,6 +124,6 @@ class ContactRequestForm(forms.ModelForm):
         if 'broker' in self.data:
             try:
                 broker_id = int(self.data.get('broker'))
-                self.fields['property'].queryset = Property.objects.filter(creator_id=broker_id)
+                self.fields['property'].queryset = Property.objects.filter(broker_id=broker_id)
             except (ValueError, TypeError):
                 pass
