@@ -112,7 +112,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'  # Для продакшена (collectst
 
 # Медиа файлы
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Кастомная модель пользователя
 AUTH_USER_MODEL = 'accounts.User'

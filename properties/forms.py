@@ -1,12 +1,14 @@
 from django import forms
-from .models import Property, PropertyImage, PropertyType
+from .models import Property, PropertyImage
 
 
 class PropertyForm(forms.ModelForm):
     apartment_type = forms.ChoiceField(
         choices=[
+            ('', '---------'),
             ('studio', 'Студия'),
             ('apartment', 'Апартаменты'),
+
 
         ],
         required=False,
@@ -25,13 +27,18 @@ class PropertyForm(forms.ModelForm):
         min_value=1,
         help_text='Укажите общее количество этажей в доме'
     )
+    rooms = forms.IntegerField(
+        label='Количество комнат',
+        min_value=1,
+        required=True  # Явно указываем обязательность
+    )
 
     class Meta:
         model = Property
         fields = [
             'description', 'price', 'status', 'broker',
             'developer', 'is_premium', 'main_image',
-            'area', 'rooms', 'location', 'address',
+            'rooms', 'location', 'address',
             'apartment_type', 'floor', 'total_floors', 'has_finishing',
             'delivery_year',
             'is_delivered',
@@ -68,14 +75,30 @@ class PropertyForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        required_fields = {
+            'rooms': 'Укажите количество комнат',
+            'total_area': 'Укажите общую площадь',
+            'price': 'Укажите цену объекта',
+            'location': 'Укажите расположение',
+        }
         floor = cleaned_data.get('floor')
         total_floors = cleaned_data.get('total_floors')
+
+        for field, error_msg in required_fields.items():
+            if not cleaned_data.get(field):
+                self.add_error(field, error_msg)
 
         if floor and total_floors:
             if floor > total_floors:
                 self.add_error('floor', 'Этаж квартиры не может превышать общее количество этажей')
 
         return cleaned_data
+
+    def clean_main_image(self):
+        image = self.cleaned_data.get('main_image')
+        if not image:
+            raise forms.ValidationError("Главное изображение обязательно")
+        return image
 
 class PropertyImageForm(forms.ModelForm):
     images = forms.FileField(

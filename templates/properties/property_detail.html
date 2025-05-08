@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load custom_filters %}
 {% block title %}{{ property.title }} | RealEstatePro{% endblock %}
 
 {% block content %}
@@ -8,16 +8,14 @@
     /* Карусель */
     .swiper {
         width: 100%;
-        height: 300px; /* Мобильная версия */
+        height: 300px;
         border-radius: 1rem;
         overflow: hidden;
         transition: height 0.3s ease;
     }
 
     @media (min-width: 768px) {
-        .swiper {
-            height: 500px; /* Десктопная версия */
-        }
+        .swiper { height: 500px; }
     }
 
     .swiper-slide {
@@ -35,12 +33,12 @@
         object-fit: cover;
     }
 
-    /* Навигация карусели */
+    /* Навигация */
     .swiper-button-next,
     .swiper-button-prev {
         color: white;
         background: rgba(0,0,0,0.3);
-        width: 30px; /* Уменьшено для мобилок */
+        width: 30px;
         height: 30px;
         border-radius: 50%;
         backdrop-filter: blur(4px);
@@ -49,20 +47,12 @@
     @media (min-width: 768px) {
         .swiper-button-next,
         .swiper-button-prev {
-            width: 40px; /* Оригинальный размер */
+            width: 40px;
             height: 40px;
         }
-    }
-
-    .swiper-button-next:after,
-    .swiper-button-prev:after {
-        font-size: 1.2rem; /* Уменьшено для мобилок */
-    }
-
-    @media (min-width: 768px) {
         .swiper-button-next:after,
         .swiper-button-prev:after {
-            font-size: 1.5rem; /* Оригинальный размер */
+            font-size: 1.5rem;
         }
     }
 
@@ -89,10 +79,10 @@
 
     .close-modal {
         position: absolute;
-        top: 15px; /* Уменьшено для мобилок */
+        top: 15px;
         right: 20px;
         color: white;
-        font-size: 30px; /* Уменьшено для мобилок */
+        font-size: 30px;
         cursor: pointer;
         opacity: 0.8;
         transition: opacity 0.2s;
@@ -100,7 +90,7 @@
 
     @media (min-width: 768px) {
         .close-modal {
-            top: 25px; /* Оригинальный размер */
+            top: 25px;
             right: 35px;
             font-size: 40px;
         }
@@ -112,11 +102,9 @@
         to {transform: scale(1); opacity: 1;}
     }
 
-    .modal-opened {
-        animation: zoomIn 0.3s ease-out;
-    }
+    .modal-opened { animation: zoomIn 0.3s ease-out; }
 
-    /* Описание со скроллом */
+    /* Описание */
     .scrollable-description {
         max-height: 400px;
         overflow-y: auto;
@@ -125,23 +113,13 @@
     }
 
     .scrollable-description::-webkit-scrollbar {
-        width: 4px; /* Уменьшено для мобилок */
+        width: 4px;
     }
 
     @media (min-width: 768px) {
         .scrollable-description::-webkit-scrollbar {
-            width: 6px; /* Оригинальный размер */
+            width: 6px;
         }
-    }
-
-    .scrollable-description::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-    }
-
-    .scrollable-description::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 4px;
     }
 
     /* Боковая панель */
@@ -150,82 +128,78 @@
         max-height: 500px;
         position: sticky;
         top: 20px;
-        padding: 1rem; /* Добавлено для мобилок */
+        padding: 1rem;
     }
 
     @media (max-width: 767px) {
         .contact-sidebar {
-            margin-top: 2rem; /* Отступ на мобилках */
-            position: static; /* Убираем sticky */
+            margin-top: 2rem;
+            position: static;
         }
     }
 
     /* Кнопки */
     .btn-primary {
+        border-radius: 9999px;
         background: #3b82f6;
         color: white;
         border: 2px solid transparent;
-        padding: 0.6rem 1.5rem; /* Уменьшено для мобилок */
+        padding: 0.6rem 1.5rem;
         font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
     }
 
     .btn-outline {
+        border-radius: 9999px;
         border: 2px solid #e5e7eb;
         color: #34495e;
-        padding: 0.6rem 1.5rem; /* Уменьшено для мобилок */
+        justify-content: center;
+        text-align: center;
+         width: 100%;
+        padding: 0.6rem 1.5rem;
         font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     @media (min-width: 768px) {
         .btn-primary,
         .btn-outline {
-            padding: 0.75rem 2rem; /* Оригинальный размер */
+            padding: 0.75rem 2rem;
             font-size: 1rem;
         }
     }
 
-    .btn-primary:hover {
-        background: #2563eb;
-    }
-
-    .btn-outline:hover {
-        border-color: #3b82f6;
-        color: #3b82f6;
-    }
-
-    /* Адаптивная сетка параметров */
+    /* Адаптивная сетка */
     .params-grid {
-        grid-template-columns: repeat(1, 1fr); /* Мобильная версия */
+        grid-template-columns: repeat(2, 1fr);
         gap: 0.5rem;
+    }
+
+    @media (max-width: 380px) {
+        .params-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     @media (min-width: 640px) {
         .params-grid {
-            grid-template-columns: repeat(2, 1fr); /* Планшеты */
+            grid-template-columns: repeat(3, 1fr);
         }
     }
 
-    @media (min-width: 768px) {
-        .params-grid {
-            grid-template-columns: repeat(3, 1fr); /* Десктоп */
-            gap: 1rem;
-        }
-    }
-
-    /* Адаптивные тексты */
-    .mobile-text-xl {
-        font-size: 1.25rem;
-        line-height: 1.75rem;
-    }
-
-    @media (min-width: 768px) {
-        .mobile-text-xl {
-            font-size: 1.875rem;
-            line-height: 2.25rem;
-        }
+    .params-grid > div {
+        padding: 1rem;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 </style>
-
 <div class="registration-container">
     <div class="bg-white rounded-xl shadow-sm p-4 md:p-8 border-2 border-gray-100">
         <!-- Карусель -->
@@ -238,8 +212,9 @@
                          loading="lazy">
                 </div>
 
+
                 <!-- Дополнительные фото -->
-                {% for image in property.images.all %}
+               {% for image in property.images.all %}
                 <div class="swiper-slide">
                     <img src="{{ image.image.url }}"
                          alt="Фото объекта {{ forloop.counter }}"
@@ -247,6 +222,7 @@
                 </div>
                 {% endfor %}
             </div>
+
 
             <!-- Элементы управления -->
             <div class="swiper-button-next"></div>
@@ -259,15 +235,14 @@
             <img class="modal-content" id="expandedImg">
         </div>
 
-        <!-- Основная информация -->
-         <!-- Основная информация -->
+       <!-- Основная информация -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
             <!-- Левая колонка -->
             <div class="lg:col-span-2">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">{{ property.title }}</h1>
 
                 <div class="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 mb-4 md:mb-6">
-                    <span class="text-xl md:text-2xl font-bold text-blue-600">Цена: {{ property.price|floatformat:"0" }} ₽</span>
+                    <span class="text-2xl font-bold text-blue-600">{{ property.price|space_format }} ₽</span>
                     {% if property.is_featured %}
                     <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-sm">
                         ★ Premium
@@ -275,60 +250,77 @@
                     {% endif %}
                 </div>
 
-                <!-- Параметры -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-8 params-grid">
-                    <div class="bg-gray-50 p-3 md:p-4 rounded-lg">
-                        <div class="text-xs md:text-sm text-gray-500">Площадь</div>
-                        <div class="text-lg md:text-xl font-bold">{{ property.area }} м²</div>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <div class="text-sm text-gray-500">Комнат</div>
-                        <div class="text-xl font-bold">{{ property.rooms }}</div>
-                    </div>
-                    <div class="bg-gray-50 p-3 md:p-4 rounded-lg">
-    <div class="text-xs md:text-sm text-gray-500">Этаж.</div>
-    <div class="text-lg md:text-xl font-bold">
-        {{ property.floor }}/{{ property.total_floors }}
-    </div>
-</div>
-                </div>
-                 <div class="bg-gray-50 p-4 rounded-lg">
-        <div class="text-sm text-gray-500">Общая площадь</div>
-        <div class="text-xl font-bold">{{ property.total_area }} м²</div>
+               <!-- Параметры -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-8 params-grid">
+    <!-- Город -->
+    <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="text-xs md:text-sm text-gray-500">Город</div>
+        <div class="text-lg md:text-xl font-bold">{{ property.location|default:"Не указан" }}</div>
     </div>
 
+    <!-- Адрес -->
     <div class="bg-gray-50 p-4 rounded-lg">
-        <div class="text-sm text-gray-500">Жилая площадь</div>
-        <div class="text-xl font-bold">{{ property.living_area }} м²</div>
+        <div class="text-xs md:text-sm text-gray-500">Адрес</div>
+        <div class="text-lg md:text-xl font-bold">{{ property.address|default:"Не указан" }}</div>
     </div>
 
+    <!-- Комнаты -->
     <div class="bg-gray-50 p-4 rounded-lg">
-        <div class="text-sm text-gray-500">Год сдачи</div>
-        <div class="text-xl font-bold">{{ property.delivery_year|default:"-" }}</div>
+        <div class="text-xs md:text-sm text-gray-500">Комнат</div>
+        <div class="text-lg md:text-xl font-bold">{{ property.rooms }}</div>
     </div>
 
+    <!-- Этаж -->
     <div class="bg-gray-50 p-4 rounded-lg">
-        <div class="text-sm text-gray-500">Метро</div>
-        <div class="text-xl font-bold">{{ property.metro_station|default:"Не указано" }}</div>
+        <div class="text-xs md:text-sm text-gray-500">Этаж</div>
+        <div class="text-lg md:text-xl font-bold">
+            {{ property.floor }}/{{ property.total_floors }}
+        </div>
     </div>
 
+    <!-- Общая площадь -->
     <div class="bg-gray-50 p-4 rounded-lg">
-        <div class="text-sm text-gray-500">Отделка</div>
-        <div class="text-xl font-bold">
+        <div class="text-xs md:text-sm text-gray-500">Общая площадь</div>
+        <div class="text-lg md:text-xl font-bold">{{ property.total_area }} м²</div>
+    </div>
+
+    <!-- Жилая площадь -->
+    <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="text-xs md:text-sm text-gray-500">Жилая площадь</div>
+        <div class="text-lg md:text-xl font-bold">{{ property.living_area }} м²</div>
+    </div>
+
+    <!-- Год сдачи -->
+    <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="text-xs md:text-sm text-gray-500">Год сдачи</div>
+        <div class="text-lg md:text-xl font-bold">{{ property.delivery_year|default:"-" }}</div>
+    </div>
+
+    <!-- Метро -->
+    <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="text-xs md:text-sm text-gray-500">Метро</div>
+        <div class="text-lg md:text-xl font-bold">{{ property.metro_station|default:"Не указано" }}</div>
+    </div>
+
+    <!-- Отделка -->
+    <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="text-xs md:text-sm text-gray-500">Отделка</div>
+        <div class="text-lg md:text-xl font-bold">
             {{ property.has_finishing|yesno:"С отделкой,Без отделки" }}
         </div>
     </div>
 
+    <!-- Статус -->
     <div class="bg-gray-50 p-4 rounded-lg">
-        <div class="text-sm text-gray-500">Статус</div>
-        <div class="text-xl font-bold">
+        <div class="text-xs md:text-sm text-gray-500">Статус</div>
+        <div class="text-lg md:text-xl font-bold">
             {{ property.is_delivered|yesno:"Сдан,Не сдан" }}
         </div>
     </div>
 </div>
 
                 <!-- Описание объекта -->
-                 <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">Описание</h2>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">Описание</h2>
                 <div class="scrollable-description prose max-w-none text-sm md:text-base">
                     {{ property.description|linebreaks }}
                 </div>
@@ -373,20 +365,22 @@
 
                     {% if user.is_authenticated %}
                     <div class="mt-6 md:mt-8 space-y-2">
-                        <a href="{% url 'contact_broker' property.broker.id %}"
-                           class="btn-primary hover:bg-blue-700 transition-colors">
-                            <i class="bi bi-chat-left-text"></i> Написать
-                        </a>
+    <div class="mt-6 md:mt-8 flex flex-col gap-4"> <!-- Добавлен flex и gap -->
+    <a href="{% url 'contact_broker' property.broker.id %}"
+       class="btn-primary hover:bg-blue-700 transition-colors">
+        <i class="bi bi-chat-left-text mr-2"></i> Написать
+    </a>
 
-                        <button class="btn-outline toggle-favorite hover:border-blue-600 hover:text-blue-600">
-                            <i class="bi bi-heart{% if property in user.favorites.all %}-fill{% endif %}"></i>
-                            <span class="hidden md:inline">{{ property|yesno:"Удалить из избранного,Добавить в избранное" }}</span>
-                            <span class="md:hidden">{{ property|yesno:"Удалить,Добавить" }}</span>
-                        </button>
-                    </div>
+    <button class="btn-outline toggle-favorite hover:border-blue-600 hover:text-blue-600">
+        <i class="bi bi-heart{% if property in user.favorites.all %}-fill{% endif %} mr-2"></i>
+        <span class="hidden md:inline">{{ property|yesno:"Удалить из избранного,Добавить в избранное" }}</span>
+        <span class="md:hidden">{{ property|yesno:"Удалить,Добавить" }}</span>
+    </button>
+</div>
                     {% endif %}
                 </div>
             </div>
+          </div>
         </div>
     </div>
 </div>

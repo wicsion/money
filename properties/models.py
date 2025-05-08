@@ -66,12 +66,6 @@ class Property(models.Model):
         decimal_places=2,
         verbose_name=_('Цена')
     )
-    area = models.DecimalField(
-        max_digits=8,
-        decimal_places=2,
-        default=0.00,
-    verbose_name=_('Площадь (м²)')
-    )
     rooms = models.PositiveIntegerField(
         verbose_name=_('Количество комнат')
     )
@@ -84,7 +78,8 @@ class Property(models.Model):
     )
     main_image = models.ImageField(
         upload_to='properties/',
-        verbose_name=_('Главное изображение')
+        verbose_name=_('Главное изображение'),
+        blank=False
     )
     status = models.CharField(
         max_length=10,
@@ -212,12 +207,15 @@ class Property(models.Model):
             if self.total_floors:
                 floor_info = f"{self.floor}/{self.total_floors}"  # Добавляем общее количество этажей
 
-            self.title = f"{type_map.get(self.apartment_type, 'Квартира')}, {self.area} м², {floor_info} этаж"
+            self.title = f"{type_map.get(self.apartment_type, 'Квартира')}, {self.total_area} м², {floor_info} этаж"
 
         elif self.property_type.name == 'house':
-            self.title = f"Дом, {self.area} м²"
+            self.title = f"Дом, {self.total_area} м²"
         else:
-            self.title = f"{self.property_type.get_name_display()}, {self.area} м²"
+            self.title = f"{self.property_type.get_name_display()}, {self.total_area} м²"
+
+            #if not self.total_area or (self.property_type.name in ['new_flat', 'resale_flat'] and not self.floor):
+               # raise ValueError("Недостаточно данных для генерации заголовка")
 
         super().save(*args, **kwargs)
 

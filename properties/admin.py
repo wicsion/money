@@ -29,7 +29,7 @@ class PropertyAdmin(admin.ModelAdmin):
             'fields': ('title', 'description', 'property_type', 'is_approved', 'status')
         }),
         ('Характеристики', {
-            'fields': ('price', 'area', 'rooms', 'location', 'address')
+            'fields': ('price', 'living_area', 'total_area', 'rooms', 'location', 'address')
         }),
         ('Метаданные', {
             'fields': ('broker', 'developer', 'is_premium', 'main_image')

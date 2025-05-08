@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load custom_filters %}
 {% block title %}Каталог недвижимости | RealEstatePro{% endblock %}
 
 {% block content %}
@@ -65,12 +65,12 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <i class="bi bi-arrows-fullscreen"></i>
-                        {{ property.area }} м²
+                        {{ property.total_area}} м²
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between mt-4">
-                    <span class="text-2xl font-bold text-blue-600">{{ property.price|floatformat:"0" }} ₽</span>
+                    <span class="text-2xl font-bold text-blue-600">{{ property.price|space_format }} ₽</span>
                     {% if user.is_authenticated %}
                     <button class="toggle-favorite" data-property-id="{{ property.id }}">
                         <i class="bi bi-heart{% if property in user.favorites.all %}-fill text-red-500{% endif %} text-xl"></i>

@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.views.generic import ( DetailView,
@@ -57,9 +58,23 @@ class PropertyCreateView(LoginRequiredMixin, CreateView):
         property_type = get_object_or_404(PropertyType, name=self.kwargs['property_type'])
         context['property_type_name'] = property_type.get_name_display()
         context['show_apartment_fields'] = property_type.name in ['new_flat', 'resale_flat']
+        context['step'] = 1
         return context
 
     def form_valid(self, form):
+        with transaction.atomic():
+         images = self.request.FILES.getlist('images')
+
+         if 'main_image' not in self.request.FILES:
+             form.add_error('main_image', 'Главное изображение обязательно')
+             return self.form_invalid(form)
+
+        # Проверка изображений ДО сохранения объекта
+        if len(images) > 10:
+            form.add_error(None, "Максимальное количество фото - 10")
+            return self.form_invalid(form)
+
+        # Сохраняем объект только если проверки пройдены
         form.instance.property_type = get_object_or_404(
             PropertyType,
             name=self.kwargs['property_type']
@@ -67,13 +82,9 @@ class PropertyCreateView(LoginRequiredMixin, CreateView):
         form.instance.broker = self.request.user
         form.instance.is_approved = False
         self.object = form.save()
-        images = self.request.FILES.getlist('images')
 
-        if len(images) > 10:
-            form.add_error(None, "Максимальное количество фото - 10")
-            return self.form_invalid(form)
-
-        for img in images:
+        # Создаем изображения
+        for img in images[:10]:  # Двойная проверка
             PropertyImage.objects.create(property=self.object, image=img)
 
         return super().form_valid(form)

@@ -5,6 +5,7 @@
 
 {% block content %}
 <style>
+    /* Все стили остаются без изменений */
     .creation-stepper {
         max-width: 800px;
         margin: 2rem auto;
@@ -41,21 +42,57 @@
         color: #6b7280;
     }
 
-     .w-full.px-3.py-2.border.rounded-lg:focus {
-        border-color: #3b82f6 !important;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        transition: all 0.2s ease;
+    .form-step {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .form-step.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .form-card {
+        padding: 1.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-card:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);
     }
 </style>
 
 <div class="creation-stepper">
+    <!-- Индикатор шагов -->
     <div class="step-indicator">
-        <div class="step-badge step-inactive">1</div>
-        <span class="text-gray-500">Выбор типа</span>
+        <div class="step-badge step-active">1</div>
+        <span class="text-blue-600 font-semibold">Основные данные</span>
         <div class="flex-1 border-t-2 border-dashed mx-2"></div>
-        <div class="step-badge step-active">2</div>
-        <span class="text-blue-600 font-semibold">Детали объекта</span>
+        <div class="step-badge step-inactive">2</div>
+        <span class="text-gray-500">Фото и описание</span>
+        <div class="flex-1 border-t-2 border-dashed mx-2"></div>
+        <div class="step-badge step-inactive">3</div>
+        <span class="text-gray-500">Адрес и метро</span>
     </div>
 
     <h1 class="text-2xl font-bold mb-6 text-gray-800">
@@ -63,7 +100,7 @@
         Добавление {{ property_type_name }}
     </h1>
 
-    <form method="post" enctype="multipart/form-data" class="space-y-6">
+    <form method="post" enctype="multipart/form-data" class="space-y-6" id="property-form">
         {% csrf_token %}
         {{ form.status }}
         {{ form.broker }}
@@ -83,125 +120,198 @@
         </div>
         {% endif %}
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Левая колонка -->
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Основное фото</label>
-                    {% render_field form.main_image class="w-full px-3 py-2 border rounded-lg" %}
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Дополнительные фото (до 10)</label>
-                    <input type="file" name="images" multiple
-                           class="w-full px-3 py-2 border rounded-lg"
-                           accept="image/*">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Описание</label>
-                    {% render_field form.description class="w-full px-3 py-2 border rounded-lg h-32" %}
-                </div>
-            </div>
-
-            <!-- Правая колонка -->
-              <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Цена (₽)</label>
-                        {% render_field form.price class="w-full px-3 py-2 border rounded-lg" %}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Площадь (м²)</label>
-                        {% render_field form.area class="w-full px-3 py-2 border rounded-lg" %}
-                    </div>
-                </div>
-
-                {% if show_apartment_fields %}
-                <div class="grid grid-cols-2 gap-4">
-                    <!-- Тип квартиры -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Тип квартиры</label>
-                        {% render_field form.apartment_type class="w-full px-3 py-2 border rounded-lg" %}
-                        <small class="text-gray-500 text-xs">Необязательное поле</small>
-                    </div>
-
-                    <!-- Блок с этажами -->
-                    <div class="space-y-2">
+        <!-- Шаг 1: Основные данные -->
+        <div class="form-step active" data-step="1">
+            <div class="card-grid">
+                <div class="form-card">
+                    <h3 class="text-lg font-semibold mb-4">Характеристики</h3>
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Этаж квартиры</label>
-                            {% render_field form.floor class="w-full px-3 py-2 border rounded-lg" %}
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Цена (₽)</label>
+                            {% render_field form.price class="w-full px-3 py-2 border rounded-lg" %}
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Всего этажей в доме</label>
-                            {% render_field form.total_floors class="w-full px-3 py-2 border rounded-lg" %}
-                            <small class="text-gray-500 text-xs">Обязательно для квартир</small>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Комнат</label>
+                                {% render_field form.rooms class="w-full px-3 py-2 border rounded-lg" %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Общая площадь (м²)</label>
+                                {% render_field form.total_area class="w-full px-3 py-2 border rounded-lg" %}
+                            </div>
                         </div>
+                        {% if show_apartment_fields %}
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Этаж</label>
+                                {% render_field form.floor class="w-full px-3 py-2 border rounded-lg" %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Всего этажей</label>
+                                {% render_field form.total_floors class="w-full px-3 py-2 border rounded-lg" %}
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Комнат</label>
-                        {% render_field form.rooms class="w-full px-3 py-2 border rounded-lg" %}
+                <div class="form-card">
+                    <h3 class="text-lg font-semibold mb-4">Дополнительно</h3>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            {% if show_apartment_fields %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Тип квартиры</label>
+                                {% render_field form.apartment_type class="w-full px-3 py-2 border rounded-lg" %}
+                                <small class="text-gray-500 text-xs">Необязательное поле</small>
+                            </div>
+                            {% endif %}
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Год сдачи</label>
+                                {% render_field form.delivery_year class="w-full px-3 py-2 border rounded-lg" %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Жилая площадь (м²)</label>
+                                {% render_field form.living_area class="w-full px-3 py-2 border rounded-lg" %}
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex items-center gap-2">
+                                {% render_field form.has_finishing class="w-4 h-4" %}
+                                <label class="text-sm font-medium text-gray-700">С отделкой</label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                {% render_field form.is_delivered class="w-4 h-4" %}
+                                <label class="text-sm font-medium text-gray-700">Дом сдан</label>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Адрес</label>
-                    {% render_field form.address class="w-full px-3 py-2 border rounded-lg" %}
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Расположение</label>
-                    {% render_field form.location class="w-full px-3 py-2 border rounded-lg" %}
                 </div>
             </div>
         </div>
-        <div class="grid grid-cols-2 gap-4">
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Общая площадь (м²)</label>
-        {% render_field form.total_area class="w-full px-3 py-2 border rounded-lg" %}
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Жилая площадь (м²)</label>
-        {% render_field form.living_area class="w-full px-3 py-2 border rounded-lg" %}
-    </div>
-</div>
 
-<div class="grid grid-cols-2 gap-4">
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Год сдачи</label>
-        {% render_field form.delivery_year class="w-full px-3 py-2 border rounded-lg" %}
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Метро</label>
-        {% render_field form.metro_station class="w-full px-3 py-2 border rounded-lg" %}
-    </div>
-</div>
+        <!-- Шаг 2: Фото и описание -->
+        <div class="form-step" data-step="2">
+            <div class="card-grid">
+                <div class="form-card">
+                    <h3 class="text-lg font-semibold mb-4">Визуальная информация</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Основное фото</label>
+                            {% render_field form.main_image class="w-full px-3 py-2 border rounded-lg" %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Дополнительные фото</label>
+                            <input type="file" name="images" multiple
+                                   class="w-full px-3 py-2 border rounded-lg"
+                                   accept="image/*">
+                            <small class="text-gray-500 text-sm">Максимум 10 изображений</small>
+                        </div>
+                    </div>
+                </div>
 
-<div class="grid grid-cols-2 gap-4">
-    <div class="flex items-center gap-2">
-        {% render_field form.has_finishing class="w-4 h-4" %}
-        <label class="text-sm font-medium text-gray-700">С отделкой</label>
-    </div>
-    <div class="flex items-center gap-2">
-        {% render_field form.is_delivered class="w-4 h-4" %}
-        <label class="text-sm font-medium text-gray-700">Дом сдан</label>
-    </div>
-</div>
+                <div class="form-card">
+                    <h3 class="text-lg font-semibold mb-4">Текстовое описание</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Описание объекта</label>
+                            {% render_field form.description class="w-full px-3 py-2 border rounded-lg h-32" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <div class="flex justify-end gap-4 mt-8">
-            <a href="{% url 'select-property-type' %}"
-               class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+        <!-- Шаг 3: Адрес и метро -->
+        <div class="form-step" data-step="3">
+            <div class="card-grid">
+                <div class="form-card">
+                    <h3 class="text-lg font-semibold mb-4">Расположение</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Адрес</label>
+                            {% render_field form.address class="w-full px-3 py-2 border rounded-lg" rows="3" %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Метро</label>
+                            {% render_field form.metro_station class="w-full px-3 py-2 border rounded-lg" %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Город</label>
+                            {% render_field form.location class="w-full px-3 py-2 border rounded-lg" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Навигационные кнопки -->
+        <div class="form-navigation">
+            <button type="button" class="prev-step px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50" disabled>
                 ← Назад
-            </a>
-            <button type="submit"
-                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            </button>
+            <button type="button" class="next-step px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                Далее →
+            </button>
+            <button type="submit" class="submit-btn px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hidden">
                 Опубликовать объект
             </button>
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const steps = document.querySelectorAll('.form-step');
+    const prevBtn = document.querySelector('.prev-step');
+    const nextBtn = document.querySelector('.next-step');
+    const submitBtn = document.querySelector('.submit-btn');
+    let currentStep = 0;
+
+    function updateSteps() {
+        // Обновление индикатора шагов
+        document.querySelectorAll('.step-badge').forEach((badge, index) => {
+            badge.classList.toggle('step-active', index === currentStep);
+            badge.classList.toggle('step-inactive', index !== currentStep);
+        });
+
+        // Показать/скрыть шаги
+        steps.forEach((step, index) => {
+            step.classList.toggle('active', index === currentStep);
+        });
+
+        // Обновление кнопок навигации
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.classList.toggle('hidden', currentStep === steps.length - 1);
+        submitBtn.classList.toggle('hidden', currentStep !== steps.length - 1);
+    }
+
+    function validateStep(step) {
+        let isValid = true;
+        const inputs = steps[step].querySelectorAll('input, select, textarea');
+        
+        inputs.forEach(input => {
+            if (!input.reportValidity()) isValid = false;
+        });
+
+        return isValid;
+    }
+
+    nextBtn.addEventListener('click', function() {
+        if (validateStep(currentStep)) {
+            currentStep++;
+            updateSteps();
+        }
+    });
+
+    prevBtn.addEventListener('click', function() {
+        currentStep--;
+        updateSteps();
+    });
+
+    // Инициализация шагов
+    updateSteps();
+});
+</script>
 {% endblock %}
