@@ -55,4 +55,9 @@ urlpatterns = [
     path('api/typing/<int:pk>/', views.TypingAPIView.as_view(), name='typing-api'),
     path('contact-request/<int:pk>/message/', MessageCreateView.as_view(), name='add_message'),
     path('properties/<int:pk>/delete/', PropertyDeleteView.as_view(), name='property-delete'),
+    path('create-request/', views.CreateRequestChoiceView.as_view(), name='create-request-choice'),
+    path('brokers/', views.BrokerListView.as_view(), name='broker-list'),
+    path('developers/', views.DeveloperListView.as_view(), name='developer-list'),
+    path('contact-broker/<int:pk>/<int:property_id>/', views.DirectContactBrokerView.as_view(), name='contact_broker'),
+
 ]

@@ -97,7 +97,8 @@ AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailVerifiedBackend',
 ]
 
-
+FILE_UPLOAD_PERMISSIONS = 0o644
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10*1024*1024
 # Интернационализация
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Moscow'
@@ -136,6 +137,7 @@ DEFAULT_FROM_EMAIL = 'RealEstatePro <goldinpav@yandex.ru>'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 
 class OwnerAdminMixin:

@@ -11,6 +11,7 @@ class User(AbstractUser):
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
     patronymic = models.CharField(_('patronymic'), max_length=150, blank=True)
+
     verification_token = models.CharField(max_length=100, blank=True, null=True, verbose_name='Токен верификации')
 
     class UserType(models.TextChoices):
@@ -151,6 +152,7 @@ class ContactRequest(models.Model):
         return f"Запрос #{self.id} от {self.requester}"
 
 class Message(models.Model):
+    reply_to = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
     contact_request = models.ForeignKey(ContactRequest, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()

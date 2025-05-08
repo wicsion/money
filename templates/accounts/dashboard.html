@@ -87,7 +87,6 @@
         background: linear-gradient(90deg, #dc2626 30%, #ef4444 70%);
     }
 
-
      .text-btn {
         color: #3b82f6 !important;
         font-weight: 600;
@@ -129,14 +128,12 @@
         }
     }
 
-
-
       @keyframes pulse {
         0% { transform: scale(0.95); opacity: 0.8; }
         50% { transform: scale(1.1); opacity: 1; }
         100% { transform: scale(0.95); opacity: 0.8; }
     }
-    /* Новые стили для текстовых кнопок */
+
     .text-btn {
         color: #3b82f6 !important;
         font-weight: 600;
@@ -162,8 +159,6 @@
     .text-btn:hover::after {
         width: 100%;
     }
-
-
 </style>
 
 <div class="container mx-auto px-2 sm:px-4 py-4 lg:py-8">
@@ -172,20 +167,20 @@
         <div class="lg:col-span-1 space-y-4 lg:space-y-8">
             <!-- Профиль -->
             <div class="dashboard-section p-4 lg:p-6 text-center">
-    <div class="w-44 h-44 lg:w-44lg:h-44 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-100 to-blue-50
-            flex items-center justify-center border-2 border-white shadow-lg">
-    {% if user.avatar %}
-        <img src="{{ user.avatar.url }}"
-             class="w-full h-full rounded-full object-cover"
-             alt="Аватар пользователя">
-    {% else %}
-        <svg class="w-14 h-14 lg:w-16 lg:h-16 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-        </svg>
-    {% endif %}
-</div>
+                <div class="w-44 h-44 lg:w-44lg:h-44 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-100 to-blue-50
+                        flex items-center justify-center border-2 border-white shadow-lg">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}"
+                             class="w-full h-full rounded-full object-cover"
+                             alt="Аватар пользователя">
+                    {% else %}
+                        <svg class="w-14 h-14 lg:w-16 lg:h-16 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    {% endif %}
+                </div>
 
-    <h2 class="text-xl lg:text-2xl font-bold text-gray-800 mb-2">{{ user.get_full_name }}</h2>
+                <h2 class="text-xl lg:text-2xl font-bold text-gray-800 mb-2">{{ user.get_full_name }}</h2>
 
                 <div class="mb-4 lg:mb-5">
                     <span class="badge-status">
@@ -265,29 +260,72 @@
                             </a>
                         </div>
                     </div>
-
-                    {% if active_tab == 'properties' %}
-                        {% for fav in favorite_properties %}
-                        <div class="profile-card mt-3 lg:mt-4">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 lg:p-4">
-                                <div>
-                                    <h4 class="font-semibold text-sm lg:text-base">🏠 {{ fav.property.title }}</h4>
-                                    <small class="text-gray-600 text-xs lg:text-sm">
-                                        📅 {{ fav.created_at|date:"d.m.Y" }}
-                                    </small>
+                     {% if active_tab == 'properties' %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+        {% for fav in favorite_properties %}
+            <div class="profile-card">
+                <div class="p-3 lg:p-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-20 h-20 lg:w-24 lg:h-24 rounded-lg overflow-hidden">
+                                <img src="{{ fav.property.main_image.url }}"
+                                     class="w-full h-full object-cover"
+                                     alt="{{ fav.property.title }}">
+                            </div>
+                            <div>
+                                <h4 class="text-base lg:text-lg font-bold text-gray-800">🏠 {{ fav.property.title }}</h4>
+                                <div class="flex items-center gap-2 lg:gap-3 text-xs lg:text-sm text-gray-600 mt-1">
+                                    <span>
+                                        <i class="fas fa-ruble-sign"></i>
+                                        {{ fav.property.price|floatformat:"0" }} ₽
+                                    </span>
+                                    <span>•</span>
+                                    <span>
+                                        <i class="fas fa-expand"></i>
+                                        {{ fav.property.total_area }} м²
+                                    </span>
+                                    {% if fav.property.floor %}
+                                    <span>•</span>
+                                    <span>
+                                        <i class="fas fa-layer-group"></i>
+                                        {{ fav.property.floor }}/{{ fav.property.total_floors|default:"?" }}
+                                    </span>
+                                    {% endif %}
                                 </div>
-                                <button class="btn-custom bg-red-100 text-red-600 hover:bg-red-200 mt-2 sm:mt-0">
-                                    <i class="fas fa-trash"></i>
-                                </button>
                             </div>
                         </div>
-                        {% empty %}
-                        <div class="text-center py-6 text-gray-500">
-                            <i class="fas fa-inbox text-2xl lg:text-3xl"></i>
-                            <p class="text-sm lg:text-base mt-2">Нет избранных объектов</p>
-                        </div>
-                        {% endfor %}
-                    {% else %}
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+    <a href="{% url 'property-detail' fav.property.id %}"
+       class="btn-custom w-full sm:w-auto text-center">
+        <i class="fas fa-eye mr-2"></i>
+        Просмотр
+    </a>
+
+    <div class="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+        <form method="POST"
+              action="{% url 'property-favorite' fav.id %}"
+              class="w-full">
+            {% csrf_token %}
+            <button type="submit"
+                    onclick="return confirm('Удалить объект из избранного?')"
+                    class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 w-full">
+                <i class="fas fa-trash"></i>
+            </button>
+        </form>
+    </div>
+</div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-span-full text-center py-6 text-gray-500">
+                <i class="fas fa-inbox text-2xl lg:text-3xl"></i>
+                <p class="text-sm lg:text-base mt-2">Нет избранных объектов</p>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
                         {% for fav in broker_favorites %}
                         <div class="profile-card mt-3 lg:mt-4">
                             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 lg:p-4">
@@ -334,7 +372,7 @@
                             <i class="fas fa-envelope text-blue-500/80"></i>
                             Мои запросы
                         </h3>
-                        <a href="{% url 'new_contact_request' %}" class="text-btn">
+                        <a href="{% url 'create-request-choice' %}" class="text-btn">
                             <i class="fas fa-plus mr-2"></i>
                             Создать запрос
                         </a>
@@ -376,8 +414,9 @@
                         </div>
                     {% endif %}
                 </div>
+            {% endif %}
 
-            {% elif user.user_type == 'broker' %}
+            {% if user.user_type == 'broker' %}
                 <!-- Ваши объекты -->
                 <div class="dashboard-section p-4 lg:p-8">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-8">
@@ -386,9 +425,9 @@
                             Ваши объекты
                         </h3>
                        <a href="{% url 'select-property-type' %}" class="btn-custom">
-    <i class="fas fa-plus"></i>
-    Добавить
-</a>
+                            <i class="fas fa-plus"></i>
+                            Добавить
+                        </a>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
@@ -401,8 +440,8 @@
                                         <p class="text-xs lg:text-sm text-gray-600">{{ prop.get_property_type_display }}</p>
                                     </div>
                                     <span class="badge-status {% if prop.is_approved %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
-    {{ prop.is_approved|yesno:"Одобрен,На модерации" }}
-</span>
+                                        {{ prop.is_approved|yesno:"Одобрен,На модерации" }}
+                                    </span>
                                 </div>
 
                                 <div class="flex items-center gap-2 lg:gap-3 text-xs lg:text-sm text-gray-600 mb-4">
@@ -413,7 +452,7 @@
                                     <span>•</span>
                                     <span>
                                         <i class="fas fa-expand"></i>
-                                        {{ prop.area }} м²
+                                        {{ prop.total_area }} м²
                                     </span>
                                 </div>
 
@@ -428,14 +467,14 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                          <form method="POST" action="{% url 'property-delete' prop.id %}" class="w-full">
-        {% csrf_token %}
-        <button
-            type="submit"
-            onclick="return confirm('Вы уверены, что хотите удалить этот объект?')"
-            class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 w-full">
-            <i class="fas fa-trash"></i>
-        </button>
-                                             </form>
+                                            {% csrf_token %}
+                                            <button
+                                                type="submit"
+                                                onclick="return confirm('Вы уверены, что хотите удалить этот объект?')"
+                                                class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 w-full">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                         </form>
                                     </div>
                                 </div>
                             </div>

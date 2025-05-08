@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.views.generic import ( DetailView,
@@ -9,10 +10,12 @@ from django.contrib.auth.mixins import (LoginRequiredMixin, UserPassesTestMixin)
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django_filters.views import FilterView
-from .models import Property, PropertyImage, Favorite, PropertyType
+from .models import Property, PropertyImage,  PropertyType
 from .filters import PropertyFilter
-from .forms import PropertyForm, PropertyImageForm
-
+from .forms import PropertyForm
+from  accounts.models import User
+from accounts.models import Favorite
+from django.contrib.auth.decorators import login_required
 
 class PropertyListView(FilterView):
     model = Property
@@ -23,10 +26,19 @@ class PropertyListView(FilterView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(
-            is_approved=True,
-            status='active'
-        ).select_related('property_type', 'broker', 'developer')
+        broker_id = self.request.GET.get('broker')
+        if broker_id:
+            queryset = queryset.filter(broker_id=broker_id)
+        return queryset
+
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            properties = self.get_queryset()
+            data = {
+                'options': ''.join([f'<option value="{p.id}">{p.title}</option>' for p in properties])
+            }
+            return JsonResponse(data)
+        return super().render_to_response(context, **response_kwargs)
 
 
 class PropertyDetailView(DetailView):
@@ -139,7 +151,7 @@ class PropertyUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('property-detail', kwargs={'pk': self.object.pk})
 
-
+@login_required
 def toggle_favorite(request, pk):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Not authenticated'}, status=403)
@@ -182,4 +194,25 @@ class SelectPropertyTypeView(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, self.template_name, {
             'types': PropertyType.objects.all()
+
         })
+
+
+class BrokerSearchView(View):
+    def get(self, request):
+        search = request.GET.get('search', '')
+        brokers = User.objects.filter(
+            user_type=User.UserType.BROKER  # Используем правильный фильтр по типу
+        ).filter(
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(patronymic__icontains=search)
+        )[:10]
+
+        brokers_data = [{
+            "id": broker.id,
+            "name": broker.get_full_name(),  # Полное ФИО
+            "avatar": broker.avatar.url if broker.avatar else "/static/default_avatar.png"
+        } for broker in brokers]
+
+        return JsonResponse({"brokers": brokers_data})

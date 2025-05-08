@@ -44,7 +44,8 @@ class PropertyForm(forms.ModelForm):
             'is_delivered',
             'living_area',
             'total_area',
-            'metro_station'
+            'metro_station',
+
         ]
         widgets = {
             'status': forms.HiddenInput(),

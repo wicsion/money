@@ -246,32 +246,3 @@ class PropertyImage(models.Model):
         return f"Изображение для {self.property.title}"
 
 
-class Favorite(models.Model):
-    """Избранные объекты пользователей"""
-    user = models.ForeignKey(
-        'accounts.User',
-        on_delete=models.CASCADE,
-        related_name='favorites',
-        verbose_name=_('Пользователь')
-    )
-    property = models.ForeignKey(
-        Property,
-        on_delete=models.CASCADE,
-        related_name='favorited_by',
-        verbose_name=_('Объект')
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_('Дата добавления')
-    )
-
-    class Meta:
-        verbose_name = _('Избранное')
-        verbose_name_plural = _('Избранные объекты')
-        unique_together = ('user', 'property')
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.user} → {self.property}"
-
-

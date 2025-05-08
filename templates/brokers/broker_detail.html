@@ -39,6 +39,15 @@
                         <i class="bi bi-shield-check text-blue-500"></i>
                         Лицензия №{{ broker.license_number }}
                     </div>
+                    <div class="mt-6">
+    <a href="{% url 'contact_broker' pk=property.broker.id property_id=property.id %}">
+       class="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white
+              py-3 rounded-xl text-sm font-medium hover:shadow-md
+              transition-all flex items-center justify-center gap-2">
+        <i class="fas fa-comments"></i>
+        Написать сообщение
+    </a>
+</div>
                 </div>
             </div>
         </div>
@@ -54,7 +63,7 @@
                     <h4 class="text-lg font-semibold text-gray-800 mb-3">Специализация</h4>
                     <ul class="specialization-list grid grid-cols-2 gap-2">
                         {% for item in specializations %}
-                        <li class="bg-blue-50 text-blue-800 px-3 py-1 rounded-full text-sm">{{ item|trim }}</li>
+                        <li class="bg-blue-50 text-blue-800 px-3 py-1 rounded-full text-sm"></li>
                         {% empty %}
                         <li class="text-gray-500">Не указано</li>
                         {% endfor %}

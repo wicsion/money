@@ -1,0 +1,39 @@
+{% for message in messages %}
+<div class="message-card {% if message.sender == request.user %}my-message{% endif %}">
+    <div class="message-header">
+        <div class="user-info">
+            {% if message.sender.avatar %}
+            <img src="{{ message.sender.avatar.url }}" class="user-avatar">
+            {% else %}
+            <div class="default-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            {% endif %}
+            <div>
+                <span class="username">{{ message.sender.get_full_name }}</span>
+                <span class="timestamp">{{ message.created_at|naturaltime }}</span>
+            </div>
+        </div>
+        
+        {% if message.reply_to %}
+        <div class="quoted-message">
+            <i class="fas fa-reply mr-2"></i>
+            {{ message.reply_to.text|truncatechars:50 }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="message-body">
+        {{ message.text|linebreaks }}
+        
+        {% if message.attachment %}
+        <div class="attachment">
+            <a href="{{ message.attachment.url }}" target="_blank">
+                <i class="fas fa-paperclip mr-2"></i>
+                {{ message.get_filename }}
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}

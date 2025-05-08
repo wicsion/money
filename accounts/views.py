@@ -36,6 +36,7 @@ from django.utils import timezone
 from properties.forms import PropertyForm
 from payments.models import Payment
 from properties.models import Property
+from django.core.paginator import Paginator
 
 
 def home_view(request):
@@ -178,7 +179,7 @@ def dashboard_view(request):
     # Данные по ролям
     if user.user_type == User.UserType.BROKER:
         context.update({
-            'my_properties': Property.objects.filter(broker=user),  # Убрана фильтрация по is_approved
+            'my_properties': Property.objects.filter(broker=user),
             'all_requests': user.accounts_received_requests.all().order_by('-created_at'),
             'active_requests_count': user.accounts_received_requests.filter(status='in_progress').count()
         })
@@ -186,7 +187,11 @@ def dashboard_view(request):
         context['developer_properties'] = user.created_properties.filter(is_approved=True)
     elif user.user_type == User.UserType.CLIENT:
         if active_tab == 'properties':
-            context['favorite_properties'] = user.account_favorites.filter(property__isnull=False)
+            # Исправленный запрос для избранных объектов
+            context['favorite_properties'] = Favorite.objects.filter(
+                user=request.user,
+                property__isnull=False
+            ).select_related('property')
         else:
             context['broker_favorites'] = user.broker_favorites.all()
 
@@ -277,6 +282,7 @@ def load_properties(request):
 class ContactRequestDetailView(LoginRequiredMixin, DetailView):
     model = ContactRequest
     template_name = 'accounts/contact_request_detail.html'
+    paginate_by = 50
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -287,7 +293,10 @@ class ContactRequestDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['chat_messages'] = self.object.messages.all()  # Переименовано
+        messages = self.object.messages.all()
+        paginator = Paginator(messages, self.paginate_by)
+        page = self.request.GET.get('page')
+        context['messages'] = paginator.get_page(page)
         return context
 
 
@@ -503,12 +512,12 @@ class TypingAPIView(View):
     def post(self, request, pk):
         try:
             contact_request = ContactRequest.objects.get(pk=pk)
-            # Логика отслеживания набора текста
+            # Сохраняем время последней активности
+            request.user.last_activity = timezone.now()
+            request.user.save()
             return JsonResponse({'status': 'typing'})
-
         except ContactRequest.DoesNotExist:
             return JsonResponse({'error': 'Not found'}, status=404)
-
 
 class PropertyUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Property
@@ -529,4 +538,59 @@ class PropertyDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy('dashboard')
 
     def test_func(self):
-        return self.request.user == self.get_object().creator  # Аналогичная проверка
+        return self.request.user == self.get_object().creator
+
+
+
+class CreateRequestChoiceView(LoginRequiredMixin, View):
+    template_name = 'accounts/create_request_choice.html'
+
+    def get(self, request):
+        if not request.user.is_client:
+            raise PermissionDenied("Доступно только для клиентов")
+        return render(request, self.template_name)
+
+
+class BrokerListView(ListView):
+    model = User
+    template_name = 'accounts/broker_list.html'
+    context_object_name = 'brokers'
+
+    def get_queryset(self):
+        return User.objects.filter(user_type=User.UserType.BROKER)
+
+
+class DeveloperListView(ListView):
+    model = DeveloperProfile
+    template_name = 'accounts/developer_list.html'
+    context_object_name = 'developers'
+
+
+# accounts/views.py
+class DirectContactBrokerView(LoginRequiredMixin, View):
+    def get(self, request, pk, property_id):  # Добавляем property_id
+        if not request.user.is_client:
+            raise PermissionDenied("Только клиенты могут отправлять запросы")
+
+        broker = get_object_or_404(User, pk=pk, user_type=User.UserType.BROKER)
+        property = get_object_or_404(Property, pk=property_id)  # Используем property_id из URL
+
+        contact_request = ContactRequest.objects.filter(
+            requester=request.user,
+            broker=broker,
+            status__in=['new', 'in_progress']
+        ).first()
+
+        if not contact_request:
+            contact_request = ContactRequest.objects.create(
+                requester=request.user,
+                broker=broker,
+                property=property,
+                status='new'
+            )
+
+        return redirect('contact_request_detail', pk=contact_request.pk)
+
+
+
+

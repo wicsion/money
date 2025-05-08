@@ -16,4 +16,6 @@ urlpatterns = [
     path('<int:pk>/update/', views.PropertyUpdateView.as_view(), name='property-update'),
     path('<int:pk>/favorite/', views.toggle_favorite, name='property-favorite'),
     path('<int:pk>/delete/', PropertyDeleteView.as_view(), name='property-delete'),
+    path('api/brokers/', views.BrokerSearchView.as_view(), name='broker-search'),
+
 ]

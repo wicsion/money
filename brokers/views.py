@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import  get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
@@ -11,7 +12,6 @@ from .forms import BrokerProfileForm, BrokerReviewForm
 from django.utils import timezone
 from django.views.generic import TemplateView
 
-from properties.models import Favorite
 
 
 class BrokerPropertyListView(LoginRequiredMixin, ListView):
@@ -41,6 +41,7 @@ class PropertyCreateWithSubscriptionCheck(LoginRequiredMixin, CreateView):
         form.instance.user = self.request.user
         return super().form_valid(form)
 
+
 class BrokerListView(ListView):
     model = BrokerProfile
     template_name = 'brokers/broker_list.html'
@@ -48,7 +49,18 @@ class BrokerListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return BrokerProfile.objects.filter(is_archived=False, is_approved=True)
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+
+        if search_query:
+            # Ищем по полному имени пользователя (first_name + last_name)
+            queryset = queryset.filter(
+                Q(user__first_name__icontains=search_query) |
+                Q(user__last_name__icontains=search_query) |
+                Q(user__patronymic__icontains=search_query)
+            )
+
+        return queryset.filter(is_archived=False, is_approved=True)
 
 
 class BrokerDetailView(DetailView):
@@ -110,6 +122,7 @@ class BrokerDashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         broker = self.request.user.broker_profile
 
+        from real_estate_portal.accounts.models import Favorite
         context.update({
             'my_properties': Property.objects.filter(broker=self.request.user),
             'contact_requests': ContactRequest.objects.filter(broker=self.request.user),

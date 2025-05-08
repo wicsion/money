@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import PropertyType, Property, PropertyImage, Favorite
+from .models import PropertyType, Property, PropertyImage
 
 
 class PropertyImageInline(admin.TabularInline):
@@ -61,12 +61,7 @@ class PropertyImageAdmin(admin.ModelAdmin):
     search_fields = ('property__title',)
 
 
-@admin.register(Favorite)
-class FavoriteAdmin(admin.ModelAdmin):
-    list_display = ('user', 'property', 'created_at')
-    list_filter = ('created_at',)
-    search_fields = ('user__username', 'property__title')
-    readonly_fields = ('created_at',)
+
 
 
 @admin.action(description='Одобрить выбранные объекты')
