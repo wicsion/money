@@ -31,6 +31,34 @@
         border: 1px solid rgba(59, 130, 246, 0.05);
     }
 
+    /* Новые улучшенные стили */
+    .btn-gradient {
+        @apply px-4 py-2 rounded-xl font-semibold transition-all flex items-center gap-2;
+        background: linear-gradient(90deg, #3b82f6 30%, #6366f1 70%) !important;
+        color: white !important;
+        border: none !important;
+    }
+    .btn-gradient:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .broker-form {
+        @apply flex flex-col sm:flex-row gap-2 items-start sm:items-center;
+    }
+
+    .broker-form select {
+        @apply border rounded-lg px-3 py-2 text-sm w-full;
+        background: url("data:image/svg+xml,%3csvg...") no-repeat right 0.75rem center/12px;
+    }
+
+    .rating-stars {
+        @apply inline-flex items-center gap-1;
+    }
+    .rating-stars i {
+        @apply text-amber-400 text-sm;
+    }
+
     .dashboard-avatar-container {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
@@ -38,6 +66,7 @@
          transform: scale(1.05);
          box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
     }
+
     .dashboard-avatar-image {
         @apply w-full h-full object-cover;
         min-width: 100%;
@@ -54,7 +83,7 @@
         color: #1e40af;
     }
 
-     .btn-custom {
+    .btn-custom {
         @apply px-4 lg:px-6 py-2 lg:py-3 rounded-xl font-semibold transition-all flex items-center gap-2 text-sm lg:text-base;
         background: none !important;
         color: #3b82f6 !important;
@@ -87,7 +116,7 @@
         background: linear-gradient(90deg, #dc2626 30%, #ef4444 70%);
     }
 
-     .text-btn {
+    .text-btn {
         color: #3b82f6 !important;
         font-weight: 600;
         transition: all 0.2s ease;
@@ -126,38 +155,16 @@
         .complex-form button {
             @apply w-full;
         }
+
+        .broker-form {
+            @apply w-full;
+        }
     }
 
-      @keyframes pulse {
+    @keyframes pulse {
         0% { transform: scale(0.95); opacity: 0.8; }
         50% { transform: scale(1.1); opacity: 1; }
         100% { transform: scale(0.95); opacity: 0.8; }
-    }
-
-    .text-btn {
-        color: #3b82f6 !important;
-        font-weight: 600;
-        transition: all 0.2s ease;
-        padding: 8px 12px;
-        border-radius: 8px;
-        background: none !important;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .text-btn::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: linear-gradient(90deg, #3b82f6 30%, #6366f1 70%);
-        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .text-btn:hover::after {
-        width: 100%;
     }
 </style>
 
@@ -242,9 +249,9 @@
         </div>
 
         <!-- Основной контент -->
-        <div class="lg:col-span-3 space-y-4 lg:space-y-8">
+           <div class="lg:col-span-3 space-y-4 lg:space-y-8">
             {% if user.user_type == 'client' %}
-                <!-- Избранное -->
+                <!-- Обновлённая секция Избранное -->
                 <div class="dashboard-section p-4 lg:p-8">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-8">
                         <h3 class="section-title">
@@ -260,7 +267,7 @@
                             </a>
                         </div>
                     </div>
-                     {% if active_tab == 'properties' %}
+    {% if active_tab == 'properties' %}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
         {% for fav in favorite_properties %}
             <div class="profile-card">
@@ -363,7 +370,7 @@
                         </div>
                         {% endfor %}
                     {% endif %}
-                </div>
+                </div
 
                 <!-- Мои запросы -->
                 <div class="dashboard-section p-4 lg:p-8">

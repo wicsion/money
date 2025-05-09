@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'channels',
     'corsheaders',
+    'django.contrib.humanize',
 
 
     # Локальные приложения

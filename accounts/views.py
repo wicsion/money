@@ -293,10 +293,7 @@ class ContactRequestDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        messages = self.object.messages.all()
-        paginator = Paginator(messages, self.paginate_by)
-        page = self.request.GET.get('page')
-        context['messages'] = paginator.get_page(page)
+        context['chat_messages'] = self.object.messages.all()  # Переименовано
         return context
 
 
