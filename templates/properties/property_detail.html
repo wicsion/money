@@ -365,11 +365,10 @@
 
                     {% if user.is_authenticated %}
                     <div class="mt-6 md:mt-8 flex flex-col gap-4">
-    <a href="{% url 'contact_broker' property.broker.id property.id %}"
+    <a href="{% url 'contact_broker' pk=property.broker.id property_id=property.id %}"
    class="btn-primary hover:bg-blue-700 transition-colors">
     <i class="bi bi-chat-left-text mr-2"></i> Написать
 </a>
-
     <form method="POST" action="{% url 'property-favorite' property.id %}" class="w-full">
     {% csrf_token %}
     <button type="submit" class="btn-outline hover:border-blue-600 hover:text-blue-600 w-full text-center">

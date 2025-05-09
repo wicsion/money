@@ -316,7 +316,6 @@ class ContactRequestView(LoginRequiredMixin, CreateView):
             reverse('contact_request_detail', kwargs={'pk': self.object.pk})
         )
 
-        # Отправка уведомления брокеру
         if settings.EMAIL_HOST_USER:
             subject = f'Новый запрос от {self.request.user.get_full_name()}'
             html_message = render_to_string('emails/new_request_email.html', {
@@ -461,7 +460,6 @@ class ListingCreateView(LoginRequiredMixin, CreateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        # Фильтруем только объекты текущего пользователя
         form.fields['property'].queryset = Property.objects.filter(creator=self.request.user)
         return form
 
@@ -563,18 +561,19 @@ class DeveloperListView(ListView):
     context_object_name = 'developers'
 
 
-# accounts/views.py
 class DirectContactBrokerView(LoginRequiredMixin, View):
-    def get(self, request, pk, property_id):  # Добавляем property_id
+    def get(self, request, pk, property_id):
         if not request.user.is_client:
             raise PermissionDenied("Только клиенты могут отправлять запросы")
 
         broker = get_object_or_404(User, pk=pk, user_type=User.UserType.BROKER)
-        property = get_object_or_404(Property, pk=property_id)  # Используем property_id из URL
+        property = get_object_or_404(Property, pk=property_id)
 
+        # Ищем существующий запрос ТОЛЬКО для этого объекта
         contact_request = ContactRequest.objects.filter(
             requester=request.user,
             broker=broker,
+            property=property,
             status__in=['new', 'in_progress']
         ).first()
 
@@ -589,5 +588,15 @@ class DirectContactBrokerView(LoginRequiredMixin, View):
         return redirect('contact_request_detail', pk=contact_request.pk)
 
 
+def delete_request(request, pk):
+    if request.method == 'POST':
+        # Ищем запрос, где пользователь является requester или broker
+        req = get_object_or_404(
+            ContactRequest,
+            Q(pk=pk) & (Q(requester=request.user) | Q(broker=request.user))
+        )
+        req.delete()
+        messages.success(request, "Запрос успешно удален")
+    return redirect('dashboard')
 
 

@@ -370,7 +370,7 @@
                         </div>
                         {% endfor %}
                     {% endif %}
-                </div
+                </div>
 
                 <!-- Мои запросы -->
                 <div class="dashboard-section p-4 lg:p-8">
@@ -385,120 +385,153 @@
                         </a>
                     </div>
 
-                    {% if request.user.accounts_sent_requests.all %}
-                        {% for req in request.user.accounts_sent_requests.all %}
-                        <div class="profile-card mt-3 lg:mt-4">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 lg:p-4">
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-sm lg:text-base">
-                                        <a href="{% url 'contact_request_detail' pk=req.pk %}">
-                                           <i class="fas fa-user-tag text-blue-600"></i>
-                                             {{ req.broker.get_full_name }}
-                                        </a>
-                                    </h4>
-                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2">
-                                        <span class="text-xs lg:text-sm text-gray-600">
-                                            <i class="fas fa-calendar-alt"></i>
-                                             {{ req.created_at|date:"d.m.Y H:i" }}
-                                        </span>
-                                        <span class="badge-status {% if req.status == 'new' %}badge-new{% endif %}">
-                                            {{ req.get_status_display }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <a href="{% url 'contact_request_detail' pk=req.pk %}"
-                                   class="btn-custom mt-2 sm:mt-0 w-full sm:w-auto text-center">
-                                    <i class="fas fa-comment-dots mr-2"></i>
-                                    Чат
-                                </a>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
+           {% if request.user.accounts_sent_requests.all %}
+    {% for req in request.user.accounts_sent_requests.all %}
+    <div class="profile-card mt-3 lg:mt-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 lg:p-4">
+            <div class="flex-1">
+                <h4 class="font-semibold text-sm lg:text-base">
+                    <a href="{% url 'contact_request_detail' pk=req.pk %}">
+                        <i class="fas fa-user-tag text-blue-600"></i>
+                        {{ req.broker.get_full_name }}
+                    </a>
+                </h4>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2">
+                    <span class="text-xs lg:text-sm text-gray-600">
+                        <i class="fas fa-calendar-alt"></i>
+                        {{ req.created_at|date:"d.m.Y H:i" }}
+                    </span>
+                    <span class="badge-status {% if req.status == 'new' %}badge-new{% endif %}">
+                        {{ req.get_status_display }}
+                    </span>
+                </div>
+
+                {% if req.property %}
+                <div class="mt-2 text-xs lg:text-sm text-gray-800">
+                    <i class="fas fa-building text-blue-600 mr-1"></i>
+                    {{ req.property.title }}  <!-- Оставляем только название -->
+                </div>
+                {% endif %}
+            </div>
+
+            <a href="{% url 'contact_request_detail' pk=req.pk %}"
+                class="btn-custom mt-2 sm:mt-0 w-full sm:w-auto text-center">
+                <i class="fas fa-comment-dots mr-2"></i>
+                Написать
+            </a>
+           <form method="POST"
+              action="{% url 'delete_request' pk=req.pk %}"
+              class="w-full sm:w-auto">
+            {% csrf_token %}
+            <button type="submit"
+                    onclick="return confirm('Вы уверены, что хотите удалить этот запрос?')"
+                    class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 w-full">
+                <i class="fas fa-trash"></i>
+            </button>
+        </form>
+
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+
                         <div class="text-center py-6 text-gray-500">
                             <i class="fas fa-bell-slash text-2xl lg:text-3xl"></i>
                             <p class="text-sm lg:text-base mt-2">Нет активных запросов</p>
                         </div>
                     {% endif %}
                 </div>
-            {% endif %}
+           {% endif %}
 
             {% if user.user_type == 'broker' %}
-                <!-- Ваши объекты -->
-                <div class="dashboard-section p-4 lg:p-8">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-8">
-                        <h3 class="section-title">
-                            <i class="fas fa-home text-green-500/80"></i>
-                            Ваши объекты
-                        </h3>
-                       <a href="{% url 'select-property-type' %}" class="btn-custom">
-                            <i class="fas fa-plus"></i>
-                            Добавить
-                        </a>
+    <!-- Ваши объекты -->
+    <div class="dashboard-section p-4 lg:p-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-8">
+            <h3 class="section-title">
+                <i class="fas fa-home text-green-500/80"></i>
+                Ваши объекты
+            </h3>
+            <a href="{% url 'select-property-type' %}" class="btn-custom">
+                <i class="fas fa-plus"></i>
+                Добавить
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+            {% for prop in my_properties %}
+            <div class="profile-card">
+                <div class="p-3 lg:p-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                        <!-- Исправленный блок с изображением -->
+                        <div class="w-20 h-20 lg:w-24 lg:h-24 rounded-lg overflow-hidden">
+                            {% if prop.main_image %}
+                                <img src="{{ prop.main_image.url }}"
+                                    class="w-full h-full object-cover"
+                                    alt="{{ prop.title }}">
+                            {% else %}
+                                <div class="w-full h-full bg-blue-50 flex items-center justify-center">
+                                    <i class="fas fa-home text-blue-400 text-2xl"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h4 class="text-base lg:text-lg font-bold text-gray-800">🏢 {{ prop.title }}</h4>
+                            <p class="text-xs lg:text-sm text-gray-600">{{ prop.get_property_type_display }}</p>
+                        </div>
+                        <span class="badge-status {% if prop.is_approved %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ prop.is_approved|yesno:"Одобрен,На модерации" }}
+                        </span>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-                        {% for prop in my_properties %}
-                        <div class="profile-card">
-                            <div class="p-3 lg:p-4">
-                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
-                                    <div>
-                                        <h4 class="text-base lg:text-lg font-bold text-gray-800">🏢 {{ prop.title }}</h4>
-                                        <p class="text-xs lg:text-sm text-gray-600">{{ prop.get_property_type_display }}</p>
-                                    </div>
-                                    <span class="badge-status {% if prop.is_approved %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                                        {{ prop.is_approved|yesno:"Одобрен,На модерации" }}
-                                    </span>
-                                </div>
+                    <div class="flex items-center gap-2 lg:gap-3 text-xs lg:text-sm text-gray-600 mb-4">
+                        <span>
+                            <i class="fas fa-ruble-sign"></i>
+                            {{ prop.price|floatformat:"0" }} ₽
+                        </span>
+                        <span>•</span>
+                        <span>
+                            <i class="fas fa-expand"></i>
+                            {{ prop.total_area }} м²
+                        </span>
+                    </div>
 
-                                <div class="flex items-center gap-2 lg:gap-3 text-xs lg:text-sm text-gray-600 mb-4">
-                                    <span>
-                                        <i class="fas fa-ruble-sign"></i>
-                                        {{ prop.price|floatformat:"0" }} ₽
-                                    </span>
-                                    <span>•</span>
-                                    <span>
-                                        <i class="fas fa-expand"></i>
-                                        {{ prop.total_area }} м²
-                                    </span>
-                                </div>
-
-                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                                    <a href="{% url 'property-detail' prop.id %}" class="btn-custom w-full sm:w-auto text-center">
-                                        <i class="fas fa-eye"></i>
-                                        Просмотр
-                                    </a>
-                                    <div class="flex gap-2 w-full sm:w-auto">
-                                        <a href="{% url 'property-update' prop.id %}"
-                                           class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 w-full text-center">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                         <form method="POST" action="{% url 'property-delete' prop.id %}" class="w-full">
-                                            {% csrf_token %}
-                                            <button
-                                                type="submit"
-                                                onclick="return confirm('Вы уверены, что хотите удалить этот объект?')"
-                                                class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 w-full">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                         </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% empty %}
-                        <div class="col-span-full text-center py-6">
-                            <div class="inline-block p-4 lg:p-6 bg-blue-50 rounded-full mb-4">
-                                <i class="fas fa-box-open text-2xl lg:text-3xl text-blue-600"></i>
-                            </div>
-                            <h4 class="text-gray-600 text-sm lg:text-base mb-4">Нет добавленных объектов</h4>
-                            <a href="{% url 'select-property-type' %}" class="btn-custom">
-                                Создать первый объект
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <a href="{% url 'property-detail' prop.id %}" class="btn-custom w-full sm:w-auto text-center">
+                            <i class="fas fa-eye"></i>
+                            Просмотр
+                        </a>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <a href="{% url 'property-update' prop.id %}"
+                                class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 w-full text-center">
+                                <i class="fas fa-edit"></i>
                             </a>
+                            <form method="POST" action="{% url 'property-delete' prop.id %}" class="w-full">
+                                {% csrf_token %}
+                                <button
+                                    type="submit"
+                                    onclick="return confirm('Вы уверены, что хотите удалить этот объект?')"
+                                    class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 w-full">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
                         </div>
-                        {% endfor %}
                     </div>
                 </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-6">
+                <div class="inline-block p-4 lg:p-6 bg-blue-50 rounded-full mb-4">
+                    <i class="fas fa-box-open text-2xl lg:text-3xl text-blue-600"></i>
+                </div>
+                <h4 class="text-gray-600 text-sm lg:text-base mb-4">Нет добавленных объектов</h4>
+                <a href="{% url 'select-property-type' %}" class="btn-custom">
+                    Создать первый объект
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
 
                 <!-- Платное размещение -->
                 <div class="dashboard-section p-4 lg:p-8">
@@ -582,6 +615,16 @@
                                         <i class="fas fa-comment-dots mr-2"></i>
                                         Написать
                                     </a>
+                                    <form method="POST"
+              action="{% url 'delete_request' pk=req.pk %}"
+              class="w-full sm:w-auto">
+            {% csrf_token %}
+            <button type="submit"
+                    onclick="return confirm('Вы уверены, что хотите удалить этот запрос?')"
+                    class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 w-full">
+                <i class="fas fa-trash"></i>
+            </button>
+        </form>
                                 </div>
                             </div>
                         </div>

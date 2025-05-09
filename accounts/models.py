@@ -143,7 +143,7 @@ class ContactRequest(models.Model):
 
     requester = models.ForeignKey(User, on_delete=models.CASCADE, related_name='accounts_sent_requests')
     broker = models.ForeignKey(User, on_delete=models.CASCADE, related_name='accounts_received_requests')
-    property = models.ForeignKey(Property, on_delete=models.SET_NULL, null=True, blank=True, related_name='accounts_contact_requests' )
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, null=True, blank=True, related_name='accounts_contact_requests' )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -80,11 +80,59 @@
         border-color: #3b82f6;
         box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);
     }
+     /* Мобильная адаптация */
+    @media (max-width: 768px) {
+        .creation-stepper {
+            margin: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .step-indicator {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .step-indicator span {
+            display: none;
+        }
+
+        .flex-1.border-t-2 {
+            display: none;
+        }
+
+        .card-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-card {
+            padding: 1rem;
+        }
+
+        .grid.grid-cols-2 {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .form-navigation {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-navigation button {
+            width: 100%;
+            text-align: center;
+        }
+
+        h1.text-2xl {
+            font-size: 1.5rem;
+        }
+    }
 </style>
 
 <div class="creation-stepper">
-    <!-- Индикатор шагов -->
     <div class="step-indicator">
+        <!-- Индикатор шагов (адаптирован для мобильных) -->
         <div class="step-badge step-active">1</div>
         <span class="text-blue-600 font-semibold">Основные данные</span>
         <div class="flex-1 border-t-2 border-dashed mx-2"></div>
