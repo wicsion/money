@@ -39,15 +39,7 @@
                         <i class="bi bi-shield-check text-blue-500"></i>
                         Лицензия №{{ broker.license_number }}
                     </div>
-                    <div class="mt-6">
-    <a href="{% url 'contact_broker' pk=property.broker.id property_id=property.id %}">
-       class="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white
-              py-3 rounded-xl text-sm font-medium hover:shadow-md
-              transition-all flex items-center justify-center gap-2">
-        <i class="fas fa-comments"></i>
-        Написать сообщение
-    </a>
-</div>
+
                 </div>
             </div>
         </div>
@@ -98,6 +90,15 @@
                                 Подробнее
                             </a>
                         </div>
+                         <div class="mt-6">
+    <a href="{% url 'contact_broker' pk=property.broker.id property_id=property.id %}">
+       class="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white
+              py-3 rounded-xl text-sm font-medium hover:shadow-md
+              transition-all flex items-center justify-center gap-2">
+        <i class="fas fa-comments"></i>
+        Написать сообщение
+    </a>
+</div>
                     </div>
                     {% empty %}
                     <div class="empty-state col-span-full text-center py-6 text-gray-500">
