@@ -53,6 +53,10 @@ class User(AbstractUser):
                 self.passport and self.passport.strip() != ''
             ])
 
+    @property
+    def broker_profile(self):
+        return getattr(self, 'brokers_brokerprofile', None)
+
     class UserType(models.TextChoices):
         CLIENT = 'client', _('Client')
         BROKER = 'broker', _('Broker')

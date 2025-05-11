@@ -74,32 +74,54 @@ class PropertyCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        with transaction.atomic():
-         images = self.request.FILES.getlist('images')
+        with transaction.atomic():  # Начало атомарной транзакции
+            # Проверка наличия профиля брокера
+            if not hasattr(self.request.user, 'broker_profile'):
+                form.add_error(None, "Профиль брокера не найден. Заполните данные в разделе профиля.")
+                return self.form_invalid(form)
 
-         if 'main_image' not in self.request.FILES:
-             form.add_error('main_image', 'Главное изображение обязательно')
-             return self.form_invalid(form)
+            # Проверка главного изображения
+            if 'main_image' not in self.request.FILES:
+                form.add_error('main_image', 'Главное изображение обязательно')
+                return self.form_invalid(form)
 
-        # Проверка изображений ДО сохранения объекта
-        if len(images) > 10:
-            form.add_error(None, "Максимальное количество фото - 10")
-            return self.form_invalid(form)
+            # Получение списка изображений
+            images = self.request.FILES.getlist('images')
 
-        # Сохраняем объект только если проверки пройдены
-        form.instance.property_type = get_object_or_404(
-            PropertyType,
-            name=self.kwargs['property_type']
-        )
-        form.instance.broker = self.request.user
-        form.instance.is_approved = False
-        self.object = form.save()
+            # Проверка лимита изображений (10 максимум)
+            if len(images) > 10:
+                form.add_error(None, "Максимальное количество изображений - 10")
+                return self.form_invalid(form)
 
-        # Создаем изображения
-        for img in images[:10]:  # Двойная проверка
-            PropertyImage.objects.create(property=self.object, image=img)
+            # Установка обязательных полей
+            form.instance.property_type = get_object_or_404(
+                PropertyType,
+                name=self.kwargs['property_type']
+            )
+            form.instance.broker = self.request.user.broker_profile
+            form.instance.is_approved = False
+            form.instance.creator = self.request.user  # Если нужно сохранить создателя
 
-        return super().form_valid(form)
+            # Сохранение объекта Property
+            self.object = form.save()
+
+            # Привязка изображений к объекту
+            main_image = self.request.FILES['main_image']
+            PropertyImage.objects.create(
+                property=self.object,
+                image=main_image,
+                is_main=True
+            )
+
+            # Сохранение дополнительных изображений
+            for idx, img in enumerate(images[:9], start=1):  # 9 + 1 main = 10
+                PropertyImage.objects.create(
+                    property=self.object,
+                    image=img,
+                    order=idx
+                )
+
+            return super().form_valid(form)
 
 
 
@@ -126,8 +148,14 @@ class PropertyUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         obj = self.get_object()
-
-        return self.request.user == self.get_object().broker
+        # Проверяем владельца-брокера через связь BrokerProfile.user
+        is_broker_owner = (
+                obj.broker and
+                self.request.user == obj.broker.user
+        )
+        # Проверяем владельца-застройщика
+        is_developer_owner = self.request.user == obj.developer
+        return is_broker_owner or is_developer_owner
 
 
     def form_valid(self, form):
@@ -183,10 +211,13 @@ class PropertyDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         obj = self.get_object()
-        return (
-            self.request.user == obj.broker or
-            self.request.user == obj.developer
+        # Проверяем связь через BrokerProfile.user
+        is_broker_owner = (
+                obj.broker and
+                self.request.user == obj.broker.user
         )
+        is_developer_owner = self.request.user == obj.developer
+        return is_broker_owner or is_developer_owner
 
 class SelectPropertyTypeView(LoginRequiredMixin, View):
     template_name = 'properties/select_property_type.html'

@@ -103,6 +103,13 @@ class BrokerReview(models.Model):
         default=False,
         verbose_name=_('Одобрен')
     )
+    contact_request = models.OneToOneField(
+        'accounts.ContactRequest',  # Указываем явно из-за разных приложений
+        on_delete=models.CASCADE,
+        related_name='review',
+        null=True,
+        blank=True
+    )
 
     class Meta:
         verbose_name = _('Отзыв о брокере')

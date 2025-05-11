@@ -14,13 +14,15 @@ class BrokerPropertyInline(admin.TabularInline):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if hasattr(request.user, 'broker_profile'):
-            return qs.filter(broker=request.user)
+            # Используем broker_profile вместо user
+            return qs.filter(broker=request.user.broker_profile)
         return qs.none()
 
 class BrokerReviewInline(admin.TabularInline):
     model = BrokerReview
     extra = 0
-    readonly_fields = ('client', 'rating', 'comment', 'created_at')
+    fields = ('client', 'rating', 'comment', 'created_at')  # Добавлено `rating`
+    readonly_fields = ('client', 'created_at')  # Убрано `rating`
     show_change_link = True
 
 @admin.register(BrokerProfile)

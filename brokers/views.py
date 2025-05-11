@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.http import HttpResponseForbidden
-from django.shortcuts import  get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
@@ -70,17 +70,12 @@ class BrokerDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        broker = self.object.user
-
-        # Объекты брокера
+        # Используем self.object (BrokerProfile), а не self.object.user (User)
         context['broker_properties'] = Property.objects.filter(
-            broker=broker,
+            broker=self.object,  # Передаем BrokerProfile, а не User
             status='active',
             is_approved=True
         )[:4]
-
-
-
         return context
 
 
@@ -125,3 +120,5 @@ class BrokerDashboardView(LoginRequiredMixin, TemplateView):
             'subscriptions': Subscription.objects.filter(user=self.request.user)
         })
         return context
+
+

@@ -96,7 +96,7 @@ class Property(models.Model):
         verbose_name=_('Дата обновления')
     )
     broker = models.ForeignKey(
-    'accounts.User',
+        'brokers.BrokerProfile',  # Ссылка на BrokerProfile вместо User
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -236,6 +236,8 @@ class PropertyImage(models.Model):
         default=0,
         verbose_name=_('Порядок')
     )
+    is_main = models.BooleanField(default=False,
+                                  verbose_name='Главное изображение')
 
     class Meta:
         verbose_name = _('Изображение объекта')

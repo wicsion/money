@@ -5,7 +5,19 @@
 {% block content %}
 <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css">
 <style>
-    /* Карусель */
+    /* Анимация для секций */
+    .animate-block {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .animate-block.reveal {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Стили карусели */
     .swiper {
         width: 100%;
         height: 300px;
@@ -33,30 +45,31 @@
         object-fit: cover;
     }
 
-    /* Навигация */
+    /* Исправленные стили стрелок */
     .swiper-button-next,
     .swiper-button-prev {
         color: white;
-        background: rgba(0,0,0,0.3);
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        backdrop-filter: blur(4px);
+        background: none;
+        backdrop-filter: none;
+        width: auto;
+        height: auto;
+    }
+
+    .swiper-button-next:after,
+    .swiper-button-prev:after {
+        font-size: 24px;
+        font-weight: 700;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
 
     @media (min-width: 768px) {
-        .swiper-button-next,
-        .swiper-button-prev {
-            width: 40px;
-            height: 40px;
-        }
         .swiper-button-next:after,
         .swiper-button-prev:after {
-            font-size: 1.5rem;
+            font-size: 32px;
         }
     }
 
-    /* Модальное окно */
+    /* Остальные стили без изменений */
     .image-modal {
         display: none;
         position: fixed;
@@ -96,7 +109,6 @@
         }
     }
 
-    /* Анимации */
     @keyframes zoomIn {
         from {transform: scale(0.9); opacity: 0;}
         to {transform: scale(1); opacity: 1;}
@@ -104,7 +116,6 @@
 
     .modal-opened { animation: zoomIn 0.3s ease-out; }
 
-    /* Описание */
     .scrollable-description {
         max-height: 400px;
         overflow-y: auto;
@@ -122,7 +133,6 @@
         }
     }
 
-    /* Боковая панель */
     .contact-sidebar {
         height: fit-content;
         max-height: 500px;
@@ -138,11 +148,10 @@
         }
     }
 
-    /* Кнопки */
     .btn-primary {
         border-radius: 9999px;
-        background: #3b82f6;
-        color: white;
+        background: #0060f4;
+        color: #ffffff;
         border: 2px solid transparent;
         padding: 0.6rem 1.5rem;
         font-size: 0.9rem;
@@ -154,11 +163,11 @@
 
     .btn-outline {
         border-radius: 9999px;
-        border: 2px solid #e5e7eb;
+        border: 2px solid #0a0202;
         color: #34495e;
         justify-content: center;
         text-align: center;
-         width: 100%;
+        width: 100%;
         padding: 0.6rem 1.5rem;
         font-size: 0.9rem;
         display: inline-flex;
@@ -174,7 +183,6 @@
         }
     }
 
-    /* Адаптивная сетка */
     .params-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.5rem;
@@ -199,22 +207,66 @@
         flex-direction: column;
         justify-content: center;
     }
+       /* Стили скроллбара */
+    .scrollable-description::-webkit-scrollbar,
+    .scrollable-section::-webkit-scrollbar {
+        width: 4px; /* Толщина для мобильных */
+    }
+
+    @media (min-width: 768px) {
+        .scrollable-description::-webkit-scrollbar,
+        .scrollable-section::-webkit-scrollbar {
+            width: 6px; /* Толщина для десктопов */
+        }
+    }
+
+    /* Убираем стрелки */
+    .scrollable-description::-webkit-scrollbar-button,
+    .scrollable-section::-webkit-scrollbar-button {
+        display: none;
+    }
+
+    /* Трек (фон) */
+    .scrollable-description::-webkit-scrollbar-track,
+    .scrollable-section::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 8px; /* Скругление трека */
+        margin: 2px 0; /* Отступы сверху/снизу */
+    }
+
+    /* Ползунок */
+    .scrollable-description::-webkit-scrollbar-thumb,
+    .scrollable-section::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 8px; /* Скругление ползунка */
+        transition: background 0.3s;
+    }
+
+    /* Ползунок при наведении */
+    .scrollable-description::-webkit-scrollbar-thumb:hover,
+    .scrollable-section::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    /* Для Firefox */
+    .scrollable-description,
+    .scrollable-section {
+        scrollbar-width: thin;
+        scrollbar-color: #888 #f1f1f1;
+    }
 </style>
+
 <div class="registration-container">
     <div class="bg-white rounded-xl shadow-sm p-4 md:p-8 border-2 border-gray-100">
-        <!-- Карусель -->
-        <div class="swiper mb-6 md:mb-8">
+        <!-- Карусель с анимацией -->
+        <div class="animate-block swiper mb-6 md:mb-8">
             <div class="swiper-wrapper">
-                <!-- Основное фото -->
                 <div class="swiper-slide">
                     <img src="{{ property.main_image.url }}"
                          alt="{{ property.title }}"
                          loading="lazy">
                 </div>
-
-
-                <!-- Дополнительные фото -->
-               {% for image in property.images.all %}
+                {% for image in property.images.all %}
                 <div class="swiper-slide">
                     <img src="{{ image.image.url }}"
                          alt="Фото объекта {{ forloop.counter }}"
@@ -222,9 +274,6 @@
                 </div>
                 {% endfor %}
             </div>
-
-
-            <!-- Элементы управления -->
             <div class="swiper-button-next"></div>
             <div class="swiper-button-prev"></div>
         </div>
@@ -235,22 +284,24 @@
             <img class="modal-content" id="expandedImg">
         </div>
 
-       <!-- Основная информация -->
+        <!-- Основная информация -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
             <!-- Левая колонка -->
             <div class="lg:col-span-2">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">{{ property.title }}</h1>
-
-                <div class="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 mb-4 md:mb-6">
-                    <span class="text-2xl font-bold text-blue-600">{{ property.price|space_format }} ₽</span>
-                    {% if property.is_featured %}
-                    <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-sm">
-                        ★ Premium
-                    </span>
-                    {% endif %}
+                <!-- Заголовок и цена -->
+                <div class="animate-block">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">{{ property.title }}</h1>
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 mb-4 md:mb-6">
+                        <span class="text-2xl font-bold text-blue-600">{{ property.price|space_format }} ₽</span>
+                        {% if property.is_featured %}
+                        <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-sm">
+                            ★ Premium
+                        </span>
+                        {% endif %}
+                    </div>
                 </div>
 
-               <!-- Параметры -->
+                               <!-- Параметры -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-8 params-grid">
     <!-- Город -->
     <div class="bg-gray-50 p-4 rounded-lg">
@@ -327,8 +378,8 @@
             </div>
 
             <!-- Правая колонка -->
-            <div class="contact-sidebar bg-gray-50 p-4 md:p-6 rounded-xl mt-6 md:mt-0">
-                <div class="contact-content">
+            <div class="animate-block contact-sidebar bg-gray-50 p-4 md:p-6 rounded-xl mt-6 md:mt-0">
+               <div class="contact-content">
                     <div class="mb-4 md:mb-6">
                         <h3 class="text-lg md:text-xl font-bold">Контактная информация</h3>
                     </div>
@@ -343,7 +394,9 @@
                         </div>
                         {% endif %}
                         <div>
-                            <div class="font-medium text-base md:text-lg">{{ property.broker.get_full_name }}</div>
+                            <div class="font-medium text-base md:text-lg">
+    {{ property.broker.user.get_full_name|default:"Не указано" }}
+</div>
                             <div class="text-xs md:text-sm text-gray-500">Лицензированный риелтор</div>
                         </div>
                     </div>
@@ -351,15 +404,15 @@
                     <div class="space-y-2 text-sm md:text-base">
                         <div class="flex items-center gap-2">
                             <i class="bi bi-telephone text-blue-600 text-lg"></i>
-                            <a href="tel:{{ property.broker.phone }}" class="hover:text-blue-600">
-                                {{ property.broker.phone|default:"Не указан" }}
-                            </a>
+                            <a href="tel:{{ property.broker.user.phone }}">
+    {{ property.broker.user.phone|default:"Не указан" }}
+</a>
                         </div>
                         <div class="flex items-center gap-2">
                             <i class="bi bi-envelope text-blue-600 text-lg"></i>
-                            <a href="mailto:{{ property.broker.email }}" class="hover:text-blue-600">
-                                {{ property.broker.email }}
-                            </a>
+                            <a href="mailto:{{ property.broker.user.email }}">
+    {{ property.broker.user.email }}
+</a>
                         </div>
                     </div>
 
@@ -386,13 +439,25 @@
                     {% endif %}
                 </div>
             </div>
-          </div>
         </div>
     </div>
 </div>
 
 <script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
 <script>
+    // Анимация при скролле
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('reveal');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.animate-block').forEach(element => {
+        observer.observe(element);
+    });
+
     // Инициализация карусели
     const swiper = new Swiper('.swiper', {
         loop: true,
@@ -400,9 +465,7 @@
             nextEl: '.swiper-button-next',
             prevEl: '.swiper-button-prev',
         },
-        keyboard: {
-            enabled: true,
-        },
+        keyboard: { enabled: true },
         effect: 'slide',
         speed: 500,
     });
@@ -412,7 +475,6 @@
     const modalImg = document.getElementById('expandedImg');
     const closeBtn = document.querySelector('.close-modal');
 
-    // Открытие модального окна
     document.querySelectorAll('.swiper-slide img').forEach(img => {
         img.addEventListener('click', () => {
             modal.style.display = 'flex';
@@ -421,13 +483,11 @@
         });
     });
 
-    // Закрытие модального окна
     closeBtn.addEventListener('click', () => {
         modal.style.display = 'none';
         modalImg.classList.remove('modal-opened');
     });
 
-    // Закрытие по клику вне изображения
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.style.display = 'none';
@@ -435,7 +495,6 @@
         }
     });
 
-    // Закрытие по Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
             modal.style.display = 'none';
@@ -445,36 +504,35 @@
 
     // Обработка избранного
     document.querySelectorAll('form[action*="favorite"]').forEach(form => {
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const button = form.querySelector('button');
-        const icon = form.querySelector('i');
-        const text = form.querySelector('span');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const button = form.querySelector('button');
+            const icon = form.querySelector('i');
+            const text = form.querySelector('span');
 
-        try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'Accept': 'application/json',
-                },
-            });
-            const data = await response.json();
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await response.json();
 
-            if (data.status === 'added') {
-                icon.classList.add('bi-heart-fill', 'text-red-500');
-                icon.classList.remove('bi-heart');
-                text.textContent = 'Удалить из избранного';
-            } else {
-                icon.classList.remove('bi-heart-fill', 'text-red-500');
-                icon.classList.add('bi-heart');
-                text.textContent = 'Добавить в избранное';
+                if (data.status === 'added') {
+                    icon.classList.add('bi-heart-fill', 'text-red-500');
+                    icon.classList.remove('bi-heart');
+                    text.textContent = 'Удалить из избранного';
+                } else {
+                    icon.classList.remove('bi-heart-fill', 'text-red-500');
+                    icon.classList.add('bi-heart');
+                    text.textContent = 'Добавить в избранное';
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
             }
-        } catch (error) {
-            console.error('Ошибка:', error);
-        }
+        });
     });
-});
 </script>
-
 {% endblock %}

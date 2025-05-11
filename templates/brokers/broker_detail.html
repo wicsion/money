@@ -3,10 +3,56 @@
 {% block title %}{{ broker.user.get_full_name }} | RealEstatePro{% endblock %}
 
 {% block content %}
+<style>
+    /* Стили для анимации */
+    .animate-block {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .animate-block.reveal {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Стили скроллера */
+    .scrollable-section {
+        max-height: 60vh;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .scrollable-section::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    @media (min-width: 768px) {
+        .scrollable-section::-webkit-scrollbar {
+            width: 6px;
+        }
+    }
+
+    .scrollable-section::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .scrollable-section::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
+
+    .scrollable-section::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
+
 <div class="registration-container">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Левая колонка -->
-        <div class="lg:col-span-1">
+        <div class="lg:col-span-1 animate-block">
             <div class="profile-card bg-white rounded-xl shadow-sm p-6 border-2 border-gray-100 sticky top-6">
                 <div class="text-center space-y-4">
                     {% if broker.avatar %}
@@ -22,37 +68,44 @@
                     <h2 class="text-2xl font-bold text-gray-800">{{ broker.user.get_full_name }}</h2>
 
                     <div class="stats-grid grid grid-cols-2 gap-4 bg-blue-50 rounded-xl p-4">
-    <div class="text-center">
-        <div class="text-3xl font-bold text-blue-600">{{ broker.experience }}+</div>
-        <div class="text-sm text-gray-600">лет опыта</div>
-    </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-blue-600">{{ broker.experience }}+</div>
+                            <div class="text-sm text-gray-600">лет опыта</div>
+                        </div>
                         <div class="text-center">
                             <div class="text-3xl font-bold text-blue-600">{{ broker_properties.count }}</div>
                             <div class="text-sm text-gray-600">объектов</div>
                         </div>
                     </div>
 
-                   <div class="license-badge flex items-center justify-center gap-2 text-sm text-gray-600">
-    <i class="bi bi-shield-check text-blue-500"></i>
-    Лицензия №{{ broker.license_number }}
+                    <div class="license-badge flex items-center justify-center gap-2 text-sm text-gray-600">
+                        <i class="bi bi-shield-check text-blue-500"></i>
+                        Лицензия №{{ broker.license_number }}
+                    </div>
+                    <div class="mt-4">
+    <a href="{% url 'contact_broker_consult' pk=broker.user.id %}"
+       class="bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors block">
+        Запросить консультацию
+    </a>
 </div>
-
                 </div>
             </div>
         </div>
 
         <!-- Правая колонка -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- О брокере -->
-            <div class="profile-card bg-white rounded-xl shadow-sm p-6 border-2 border-gray-100">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">О брокере</h3>
-                <p class="text-gray-600 leading-relaxed">{{ broker.about }}</p>
-
-
+            <!-- Секция "О брокере" -->
+            <div class="animate-block bg-white rounded-xl shadow-sm p-6 border-2 border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">О брокере</h2>
+                <div class="scrollable-section">
+                    <div class="prose max-w-none text-gray-600 space-y-4">
+                        {{ broker.about|safe|linebreaks }}
+                    </div>
+                </div>
             </div>
 
-            <!-- Объекты -->
-            <div class="profile-card bg-white rounded-xl shadow-sm p-6 border-2 border-gray-100">
+            <!-- Секция "Объекты" -->
+            <div class="animate-block bg-white rounded-xl shadow-sm p-6 border-2 border-gray-100">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                     <h3 class="text-xl font-bold text-gray-800">Объекты ({{ broker_properties.count }})</h3>
                     <a href="{% url 'property-list' %}?broker={{ broker.id %}"
@@ -73,18 +126,15 @@
                                 <span class="price text-blue-600 font-bold">{{ property.price }} ₽</span>
                                 <span class="area text-gray-600">{{ property.area }} м²</span>
                             </div>
-                             <a href="{% url 'contact_broker' pk=broker.user.id property_id=property.id %}"
-       class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors">
-        Написать сообщение
-    </a>
-</div>
-                            <a href="{% url 'property-detail' property.id %}"
+                            <a href="{% url 'contact_broker' pk=broker.user.id property_id=property.id %}"
                                class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors">
-                                Подробнее
+                                Написать сообщение
                             </a>
                         </div>
-                         <div class="mt-6">
-
+                        <a href="{% url 'property-detail' property.id %}"
+                           class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors mt-4">
+                            Подробнее
+                        </a>
                     </div>
                     {% empty %}
                     <div class="empty-state col-span-full text-center py-6 text-gray-500">
@@ -94,8 +144,8 @@
                 </div>
             </div>
 
-            <!-- Отзывы -->
-            <div class="profile-card bg-white rounded-xl shadow-sm p-6 border-2 border-gray-100">
+            <!-- Секция "Отзывы" -->
+            <div class="animate-block bg-white rounded-xl shadow-sm p-6 border-2 border-gray-100">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                     <h3 class="text-xl font-bold text-gray-800">Отзывы ({{ reviews.count }})</h3>
                     <div class="rating flex items-center gap-2">
@@ -134,4 +184,19 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Анимация при скролле
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('reveal');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.animate-block').forEach(element => {
+        observer.observe(element);
+    });
+</script>
 {% endblock %}

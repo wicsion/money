@@ -11,7 +11,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.views.generic import CreateView
 from django.views.generic import DeleteView
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.views import View
 from django.contrib import messages
 from .models import  StatusLog
@@ -36,9 +36,9 @@ from django.utils import timezone
 from properties.forms import PropertyForm
 from payments.models import Payment
 from properties.models import Property
-from django.core.paginator import Paginator
+from brokers.forms import BrokerReviewForm
 
-from brokers.models import BrokerProfile
+from brokers.models import BrokerProfile,BrokerReview
 
 
 def home_view(request):
@@ -177,7 +177,7 @@ def dashboard_view(request):
     # Данные по ролям
     if user.user_type == User.UserType.BROKER:
         context.update({
-            'my_properties': Property.objects.filter(broker=user),
+            'my_properties': Property.objects.filter(broker=user.broker_profile) if hasattr(user, 'broker_profile') else [],
             'all_requests': user.accounts_received_requests.all().order_by('-created_at'),
             'active_requests_count': user.accounts_received_requests.filter(status='in_progress').count()
         })
@@ -238,8 +238,13 @@ class PropertyCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('dashboard')
 
     def form_valid(self, form):
+        # Проверяем наличие профиля брокера
+        if not hasattr(self.request.user, 'broker_profile'):
+            messages.error(self.request, "Профиль брокера не найден")
+            return redirect('complete_broker_profile')  # Перенаправление на заполнение профиля
+
         form.instance.creator = self.request.user
-        form.instance.broker = self.request.user
+        form.instance.broker = self.request.user.broker_profile  # Используем профиль брокера
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -561,16 +566,31 @@ class DeveloperListView(ListView):
 
 class DirectContactBrokerView(LoginRequiredMixin, View):
     def get(self, request, pk, property_id):
-        if not request.user.is_client:
-            raise PermissionDenied("Только клиенты могут отправлять запросы")
+        # Проверяем тип пользователя через user_type
+        if request.user.user_type != User.UserType.CLIENT:
+            messages.error(request, "Только клиенты могут отправлять запросы")
+            return redirect(request.META.get('HTTP_REFERER', 'home'))
 
-        broker = get_object_or_404(User, pk=pk, user_type=User.UserType.BROKER)
-        property_obj = get_object_or_404(Property, pk=property_id, broker=broker)
+        # Получаем брокера и связанный объект Property
+        broker_user = get_object_or_404(
+            User,
+            pk=pk,
+            user_type=User.UserType.BROKER
+        )
+        broker_profile = get_object_or_404(
+            BrokerProfile,
+            user=broker_user
+        )
+        property_obj = get_object_or_404(
+            Property,
+            pk=property_id,
+            broker=broker_profile
+        )
 
-        # Поиск или создание запроса
+        # Создаем или получаем запрос
         contact_request, created = ContactRequest.objects.get_or_create(
             requester=request.user,
-            broker=broker,
+            broker=broker_user,
             property=property_obj,
             defaults={'status': 'new'}
         )
@@ -590,7 +610,7 @@ def delete_request(request, pk):
     return redirect('dashboard')
 
 class CompleteBrokerInfoView(LoginRequiredMixin, UpdateView):
-    form_class =  BrokerProfile
+    form_class =  BrokerProfileForm
     template_name = 'accounts/complete_broker_info.html'
     success_url = reverse_lazy('dashboard')
 
@@ -632,3 +652,46 @@ class CompleteBrokerInfoView(LoginRequiredMixin, UpdateView):
             is_approved=True  # Если требуется модерация
         )
 
+
+class DirectContactBrokerConsultView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        # Проверяем тип пользователя через user_type
+        if request.user.user_type != User.UserType.CLIENT:
+            messages.error(request, "Только клиенты могут отправлять запросы")
+            return redirect(request.META.get('HTTP_REFERER', 'home'))  # Возвращаем обратно
+
+        broker = get_object_or_404(User, pk=pk, user_type=User.UserType.BROKER)
+
+        # Создание запроса
+        contact_request, created = ContactRequest.objects.get_or_create(
+            requester=request.user,
+            broker=broker,
+            property=None,
+            defaults={'status': 'new'}
+        )
+
+        return redirect('contact_request_detail', pk=contact_request.pk)
+
+
+class SubmitReviewView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        contact_request = get_object_or_404(ContactRequest, pk=pk)
+
+        # Проверка условий
+        if not (contact_request.status == 'completed' and
+                request.user == contact_request.requester and
+                not hasattr(contact_request, 'review')):
+            return HttpResponseForbidden()
+
+        form = BrokerReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.broker = contact_request.broker.broker_profile
+            review.client = request.user
+            review.contact_request = contact_request
+            review.save()
+
+            # Обновляем рейтинг брокера
+            review.broker.update_rating()
+
+        return redirect('contact_request_detail', pk=pk)
