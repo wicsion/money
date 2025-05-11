@@ -23,10 +23,7 @@ class BrokerProfile(models.Model):
         default=0,
         verbose_name=_('Опыт работы (лет)')
     )
-    specialization = models.CharField(
-        max_length=200,
-        verbose_name=_('Специализация')
-    )
+
     about = models.TextField(
         verbose_name=_('О себе'),
         blank=True

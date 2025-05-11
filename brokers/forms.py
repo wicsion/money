@@ -4,7 +4,7 @@ from .models import BrokerProfile, BrokerReview
 class BrokerProfileForm(forms.ModelForm):
     class Meta:
         model = BrokerProfile
-        fields = ['license_number', 'experience', 'specialization', 'about', 'avatar']
+        fields = ['license_number', 'experience',  'about', 'avatar']
         widgets = {
             'about': forms.Textarea(attrs={'rows': 4}),
         }

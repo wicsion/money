@@ -29,7 +29,7 @@ from .models import (User, UserActivity,
                      ExclusiveProperty, PropertyListing)
 
 from .forms import (UserRegistrationForm, RoleSelectionForm,
-                    ProfileForm, ContactRequestForm)
+                    ProfileForm, ContactRequestForm, BrokerProfileForm)
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
@@ -37,6 +37,8 @@ from properties.forms import PropertyForm
 from payments.models import Payment
 from properties.models import Property
 from django.core.paginator import Paginator
+
+from brokers.models import BrokerProfile
 
 
 def home_view(request):
@@ -88,24 +90,20 @@ class CompleteRegistrationView(LoginRequiredMixin, View):
         })
 
     def post(self, request):
-        # Логирование входящих данных
         role_form = RoleSelectionForm(request.POST, instance=request.user)
         profile_form = ProfileForm(request.POST, request.FILES, instance=request.user)
 
         if role_form.is_valid() and profile_form.is_valid():
             user = role_form.save(commit=False)
             user.user_type = role_form.cleaned_data['role']
-            profile_form.save()  # Сохраняем связанные данные профиля
+            profile_form.save()
 
-            # Обновляем статусы
             user.is_verified = True
             user.is_active = True
             user.save()
 
-            profile_data = profile_form.cleaned_data
-            for field in ['last_name', 'first_name', 'patronymic', 'phone', 'passport', 'avatar']:
-                setattr(user, field, profile_data.get(field))
-            user.save()
+            if user.user_type == User.UserType.BROKER:
+                return redirect('complete_broker_info')
             return redirect('dashboard')
 
         else:
@@ -552,7 +550,7 @@ class BrokerListView(ListView):
     context_object_name = 'brokers'
 
     def get_queryset(self):
-        return User.objects.filter(user_type=User.UserType.BROKER)
+        return BrokerProfile.objects.filter(user__is_verified=True)
 
 
 class DeveloperListView(ListView):
@@ -567,23 +565,15 @@ class DirectContactBrokerView(LoginRequiredMixin, View):
             raise PermissionDenied("Только клиенты могут отправлять запросы")
 
         broker = get_object_or_404(User, pk=pk, user_type=User.UserType.BROKER)
-        property = get_object_or_404(Property, pk=property_id)
+        property_obj = get_object_or_404(Property, pk=property_id, broker=broker)
 
-        # Ищем существующий запрос ТОЛЬКО для этого объекта
-        contact_request = ContactRequest.objects.filter(
+        # Поиск или создание запроса
+        contact_request, created = ContactRequest.objects.get_or_create(
             requester=request.user,
             broker=broker,
-            property=property,
-            status__in=['new', 'in_progress']
-        ).first()
-
-        if not contact_request:
-            contact_request = ContactRequest.objects.create(
-                requester=request.user,
-                broker=broker,
-                property=property,
-                status='new'
-            )
+            property=property_obj,
+            defaults={'status': 'new'}
+        )
 
         return redirect('contact_request_detail', pk=contact_request.pk)
 
@@ -599,4 +589,46 @@ def delete_request(request, pk):
         messages.success(request, "Запрос успешно удален")
     return redirect('dashboard')
 
+class CompleteBrokerInfoView(LoginRequiredMixin, UpdateView):
+    form_class =  BrokerProfile
+    template_name = 'accounts/complete_broker_info.html'
+    success_url = reverse_lazy('dashboard')
+
+    def get_object(self):
+        # Создаем или получаем профиль брокера
+        broker_profile, created = BrokerProfile.objects.get_or_create(
+            user=self.request.user,
+            defaults={
+                'license_number': '',
+                'experience': 0,
+                'about': ''
+            }
+        )
+        return broker_profile
+
+    def form_valid(self, form):
+        broker_profile = form.save(commit=False)
+        broker_profile.user = self.request.user
+        broker_profile.save()
+
+        # Принудительно обновляем is_profile_complete
+        user = self.request.user
+        user.is_verified = True
+        user.save()  # Вызовет пересчёт is_profile_complete через модель User
+
+        return redirect(self.get_success_url())
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['experience'].required = True
+        form.fields['license_number'].required = True
+        return form
+
+    def get_queryset(self):
+        # Фильтруем подтвержденные профили брокеров
+        return BrokerProfile.objects.filter(
+            user__is_verified=True,
+            user__user_type=User.UserType.BROKER,
+            is_approved=True  # Если требуется модерация
+        )
 

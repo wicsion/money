@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.core.validators import RegexValidator
 from .models import User, ContactRequest, Property, Message
+from brokers.models import BrokerProfile
 
 
 class UserRegistrationForm(UserCreationForm):
@@ -66,6 +67,7 @@ class ProfileForm(forms.ModelForm):
 
     )
 
+
     passport = forms.CharField(
         max_length=11,
         validators=[
@@ -87,6 +89,7 @@ class ProfileForm(forms.ModelForm):
             'phone',
             'passport',
             'avatar'
+
         ]
         labels = {
             'last_name': 'Фамилия',
@@ -108,6 +111,7 @@ class ProfileForm(forms.ModelForm):
         self.fields['first_name'].required = True
         self.fields['phone'].required = True
         self.fields['passport'].required = True
+
 
 
 class ContactRequestForm(forms.ModelForm):
@@ -133,3 +137,30 @@ class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
         fields = ['text', 'attachment']
+
+
+class BrokerProfileForm(forms.ModelForm):
+        experience = forms.IntegerField(
+            label='Опыт работы (лет)',
+            min_value=0,
+            required=True,
+            widget = forms.NumberInput(attrs={'class': 'custom-input'}),
+        )
+        license_number = forms.CharField(
+            label='Номер лицензии',
+            max_length=50,
+            required=True,
+        widget = forms.TextInput(attrs={'class': 'custom-input'}),
+        )
+        about = forms.CharField(
+            label='О себе',
+            widget=forms.Textarea(attrs={'class': 'custom-input', 'rows': 4}),
+            required=True
+        )
+
+        class Meta:
+            model = BrokerProfile
+            fields = ['experience', 'license_number', 'about']
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)

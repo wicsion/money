@@ -152,6 +152,7 @@
             </div>
         </div>
 
+
         <button type="submit"
                 class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
             Завершить регистрацию <i class="bi bi-check2 ml-2"></i>
@@ -189,5 +190,17 @@
             this.closest('.role-card').classList.add('selected');
         });
     });
+    function toggleBrokerFields() {
+    const isBroker = document.querySelector('input[name="role"]:checked')?.value === 'broker';
+    document.querySelectorAll('[data-broker-field]').forEach(el => {
+        el.style.display = isBroker ? 'block' : 'none';
+    });
+}
+
+// Инициализация при загрузке и на изменении роли
+document.addEventListener('DOMContentLoaded', toggleBrokerFields);
+document.querySelectorAll('input[name="role"]').forEach(radio => {
+    radio.addEventListener('change', toggleBrokerFields);
+});
 </script>
 {% endblock %}

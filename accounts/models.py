@@ -11,8 +11,47 @@ class User(AbstractUser):
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
     patronymic = models.CharField(_('patronymic'), max_length=150, blank=True)
+    experience = models.IntegerField(
+        _('Experience'),
+        null=True,
+        blank=True,
+        help_text="Опыт работы в годах (только для брокеров)"
+    )
+    license_number = models.CharField(
+        _('License Number'),
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text="Номер лицензии (только для брокеров)"
+    )
 
     verification_token = models.CharField(max_length=100, blank=True, null=True, verbose_name='Токен верификации')
+
+    @property
+    def is_profile_complete(self):
+        if self.user_type == User.UserType.BROKER:
+            # Проверка для брокеров
+            has_broker_profile = (
+                    hasattr(self, 'broker_profile') and
+                    self.broker_profile.license_number and
+                    self.broker_profile.experience is not None
+            )
+            return (
+                    has_broker_profile and
+                    self.last_name and
+                    self.first_name and
+                    self.phone and
+                    self.passport
+            )
+        else:
+            # Проверка для клиентов и застройщиков
+            return all([
+                self.user_type,
+                self.last_name and self.last_name.strip() != '',
+                self.first_name and self.first_name.strip() != '',
+                self.phone and self.phone.strip() != '',
+                self.passport and self.passport.strip() != ''
+            ])
 
     class UserType(models.TextChoices):
         CLIENT = 'client', _('Client')
@@ -53,15 +92,7 @@ class User(AbstractUser):
     def is_developer(self):
         return self.user_type == self.UserType.DEVELOPER
 
-    @property
-    def is_profile_complete(self):
-        return all([
-            self.user_type,
-            self.last_name and self.last_name.strip() != '',
-            self.first_name and self.first_name.strip() != '',
-            self.phone and self.phone.strip() != '',
-            self.passport and self.passport.strip() != ''
-        ])
+
 
     @property
     def days_remaining(self):

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Дополнительная информация для брокеров{% endblock %}
+
+{% block content %}
+<style>
+    .registration-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .custom-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        font-size: 16px;
+        transition: all 0.2s ease;
+    }
+    .custom-input:focus {
+        border-color: #3b82f6;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+</style>
+
+<div class="registration-container">
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">
+        <i class="bi bi-person-badge mr-2"></i>Профессиональная информация
+    </h1>
+
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Вывод ошибок -->
+        {% if form.errors %}
+        <div class="bg-red-50 p-4 rounded-lg mb-6">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p class="text-red-600">✖ {{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Поля формы -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium mb-2">{{ form.experience.label }}</label>
+                {{ form.experience }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">{{ form.license_number.label }}</label>
+                {{ form.license_number }}
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-2">{{ form.about.label }}</label>
+            {{ form.about }}
+        </div>
+
+        <button type="submit"
+                class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+            Сохранить данные <i class="bi bi-check2 ml-2"></i>
+        </button>
+    </form>
+</div>
+{% endblock %}

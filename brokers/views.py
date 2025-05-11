@@ -70,21 +70,16 @@ class BrokerDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        broker = self.object
+        broker = self.object.user
 
-        # Добавляем обработку специализации
-        context['specializations'] = broker.specialization.split(',') if broker.specialization else []
-
-        context['properties'] = Property.objects.filter(
-            broker=self.object.user,
+        # Объекты брокера
+        context['broker_properties'] = Property.objects.filter(
+            broker=broker,
             status='active',
             is_approved=True
         )[:4]
 
-        context['reviews'] = BrokerReview.objects.filter(
-            broker=self.object,
-            is_approved=True
-        )[:5]
+
 
         return context
 

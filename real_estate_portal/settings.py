@@ -134,7 +134,7 @@ EMAIL_PORT = 465               # Стандартный порт для SSL
 EMAIL_USE_SSL = True           # Обязательно для порта 465
 EMAIL_HOST_USER = 'goldinpav@yandex.ru'  # Полный email
 EMAIL_HOST_PASSWORD = 'mglkpkdkfapyubfa'  # Создан в аккаунте Яндекса
-DEFAULT_FROM_EMAIL = 'RealEstatePro <goldinpav@yandex.ru>'
+DEFAULT_FROM_EMAIL = 'WinWinDeal <goldinpav@yandex.ru>'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -60,4 +60,5 @@ urlpatterns = [
     path('developers/', views.DeveloperListView.as_view(), name='developer-list'),
     path('contact-broker/<int:pk>/<int:property_id>/', views.DirectContactBrokerView.as_view(), name='contact_broker'),
     path('request/delete/<int:pk>/', views.delete_request, name='delete_request'),
+path('complete-broker-info/', views.CompleteBrokerInfoView.as_view(), name='complete_broker_info'),
 ]

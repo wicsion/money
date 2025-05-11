@@ -40,7 +40,8 @@ class ProfileCompletionMiddleware:
             '/accounts/complete-registration/',
             '/broker/',
             '/api/chat/',
-            '/api/typing/'
+            '/api/typing/',
+            '/accounts/complete-broker-info/',
         ]
 
         if request.user.is_authenticated:
