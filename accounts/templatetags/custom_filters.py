@@ -5,3 +5,7 @@ register = template.Library()
 @register.filter
 def space_format(value):
     return "{:,.0f}".format(value).replace(",", " ").replace(".", " ")
+
+@register.filter
+def subtract(value, arg):
+    return value - arg

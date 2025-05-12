@@ -6,11 +6,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from .models import BrokerProfile, BrokerReview, ContactRequest
 from properties.forms import PropertyForm
-from accounts.models import Subscription
+from accounts.models import Subscription, Favorite
 from properties.models import Property
 from .forms import BrokerProfileForm, BrokerReviewForm
 from django.utils import timezone
 from django.views.generic import TemplateView
+
 
 
 
@@ -76,6 +77,18 @@ class BrokerDetailView(DetailView):
             status='active',
             is_approved=True
         )[:4]
+
+        # Проверка избранного
+        is_favorite = False
+        user = self.request.user
+        if user.is_authenticated:
+            is_favorite = Favorite.objects.filter(
+                user=user,
+                broker=self.object.user,
+                favorite_type='broker'
+            ).exists()
+
+        context['is_favorite'] = is_favorite
         return context
 
 

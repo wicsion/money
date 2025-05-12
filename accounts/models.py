@@ -150,14 +150,15 @@ class Favorite(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'account_favorites')
-    property = models.ForeignKey(Property, on_delete=models.CASCADE, default=1 )
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, null=True,
+        blank=True )
 
     broker = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='broker_favorites'  # Добавьте это поле
+        related_name='favorite_brokers'   # Добавьте это поле
     )
 
     favorite_type = models.CharField(
@@ -182,6 +183,14 @@ class ContactRequest(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    review = models.OneToOneField(
+        'brokers.BrokerReview',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='cr_review'
+    )
 
     def __str__(self):
         return f"Запрос #{self.id} от {self.requester}"

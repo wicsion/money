@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
+
 {% load custom_filters %}
+
 {% block title %}{{ broker.user.get_full_name }} | RealEstatePro{% endblock %}
 
 {% block content %}
@@ -64,6 +66,22 @@
                         <i class="bi bi-person text-6xl text-blue-400"></i>
                     </div>
                     {% endif %}
+                    <div class="mt-4">
+            <form method="POST" action="{% url 'toggle_favorite' %}">
+                {% csrf_token %}
+                <input type="hidden" name="type" value="broker">
+                <input type="hidden" name="id" value="{{ broker.user.id }}">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors block w-full">
+                       {% if is_favorite %}
+        ★ Удалить из избранного
+    {% else %}
+        ☆ Добавить в избранное
+    {% endif %}
+</button>
+            </form>
+        </div>
 
                     <h2 class="text-2xl font-bold text-gray-800">{{ broker.user.get_full_name }}</h2>
 
@@ -108,7 +126,7 @@
             <div class="animate-block bg-white rounded-xl shadow-sm p-6 border-2 border-gray-100">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                     <h3 class="text-xl font-bold text-gray-800">Объекты ({{ broker_properties.count }})</h3>
-                    <a href="{% url 'property-list' %}?broker={{ broker.id %}"
+                   <a href="{% url 'property-list' %}?broker={{ broker.id }}"
                        class="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg border-2 border-blue-200 transition-colors">
                         Все объекты →
                     </a>
@@ -123,9 +141,18 @@
                         <div class="property-details space-y-3">
                             <h4 class="font-semibold text-gray-800">{{ property.title }}</h4>
                             <div class="price-area flex justify-between items-center">
-                                <span class="price text-blue-600 font-bold">{{ property.price }} ₽</span>
-                                <span class="area text-gray-600">{{ property.area }} м²</span>
-                            </div>
+    <span class="price text-blue-600 font-bold"> {{ property.price|space_format }} ₽</span>
+    <div class="flex items-center gap-2">
+        <span class="area text-gray-600">{{ property.total_area }} м²</span>
+        {% if property.floor %}
+            <span>•</span>
+            <span class="flex items-center gap-1">
+                <i class="fas fa-layer-group text-sm"></i>
+                {{ property.floor }}/{{ property.total_floors|default:"?" }}
+            </span>
+        {% endif %}
+    </div>
+</div>
                             <a href="{% url 'contact_broker' pk=broker.user.id property_id=property.id %}"
                                class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors">
                                 Написать сообщение

@@ -113,7 +113,7 @@ class BrokerReview(models.Model):
     contact_request = models.OneToOneField(
         'accounts.ContactRequest',  # Указываем явно из-за разных приложений
         on_delete=models.CASCADE,
-        related_name='review',
+        related_name='br_contact_request',
         null=True,
         blank=True
     )

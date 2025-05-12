@@ -301,33 +301,48 @@
                     </div>
                 </div>
 
-                               <!-- Параметры -->
+<!-- Параметры -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-8 params-grid">
     <!-- Город -->
+    {% if property.location %}
     <div class="bg-gray-50 p-4 rounded-lg">
         <div class="text-xs md:text-sm text-gray-500">Город</div>
-        <div class="text-lg md:text-xl font-bold">{{ property.location|default:"Не указан" }}</div>
+        <div class="text-lg md:text-xl font-bold">{{ property.location }}</div>
     </div>
+    {% endif %}
 
     <!-- Адрес -->
+    {% if property.address %}
     <div class="bg-gray-50 p-4 rounded-lg">
         <div class="text-xs md:text-sm text-gray-500">Адрес</div>
-        <div class="text-lg md:text-xl font-bold">{{ property.address|default:"Не указан" }}</div>
+        <div class="text-lg md:text-xl font-bold">{{ property.address }}</div>
     </div>
+    {% endif %}
 
-    <!-- Комнаты -->
+    <!-- Комнаты (только для квартир) -->
+{% if property.property_type.name == 'new_flat' or property.property_type.name == 'resale_flat' %}
     <div class="bg-gray-50 p-4 rounded-lg">
         <div class="text-xs md:text-sm text-gray-500">Комнат</div>
         <div class="text-lg md:text-xl font-bold">{{ property.rooms }}</div>
     </div>
+    {% endif %}
 
-    <!-- Этаж -->
-    <div class="bg-gray-50 p-4 rounded-lg">
-        <div class="text-xs md:text-sm text-gray-500">Этаж</div>
-        <div class="text-lg md:text-xl font-bold">
-            {{ property.floor }}/{{ property.total_floors }}
+    <!-- Этаж (только для квартир) -->
+{% if property.property_type.name == 'new_flat' or property.property_type.name == 'resale_flat' %}
+        {% if property.floor and property.total_floors %}
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="text-xs md:text-sm text-gray-500">Этаж</div>
+            <div class="text-lg md:text-xl font-bold">
+                {{ property.floor }}/{{ property.total_floors }}
+            </div>
         </div>
-    </div>
+        {% elif property.floor %}
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="text-xs md:text-sm text-gray-500">Этаж</div>
+            <div class="text-lg md:text-xl font-bold">{{ property.floor }}</div>
+        </div>
+        {% endif %}
+    {% endif %}
 
     <!-- Общая площадь -->
     <div class="bg-gray-50 p-4 rounded-lg">
@@ -335,39 +350,48 @@
         <div class="text-lg md:text-xl font-bold">{{ property.total_area }} м²</div>
     </div>
 
-    <!-- Жилая площадь -->
+
     <div class="bg-gray-50 p-4 rounded-lg">
         <div class="text-xs md:text-sm text-gray-500">Жилая площадь</div>
         <div class="text-lg md:text-xl font-bold">{{ property.living_area }} м²</div>
     </div>
 
-    <!-- Год сдачи -->
+
+    <!-- Год сдачи (только для новостроек) -->
+    {% if property.property_type.name == 'new_flat' and property.delivery_year %}
     <div class="bg-gray-50 p-4 rounded-lg">
         <div class="text-xs md:text-sm text-gray-500">Год сдачи</div>
-        <div class="text-lg md:text-xl font-bold">{{ property.delivery_year|default:"-" }}</div>
+        <div class="text-lg md:text-xl font-bold">{{ property.delivery_year }}</div>
     </div>
+    {% endif %}
 
     <!-- Метро -->
+    {% if property.metro_station and property.metro_station != "Не указано" %}
     <div class="bg-gray-50 p-4 rounded-lg">
         <div class="text-xs md:text-sm text-gray-500">Метро</div>
-        <div class="text-lg md:text-xl font-bold">{{ property.metro_station|default:"Не указано" }}</div>
+        <div class="text-lg md:text-xl font-bold">{{ property.metro_station }}</div>
     </div>
+    {% endif %}
 
-    <!-- Отделка -->
+    <!-- Отделка (только для квартир) -->
+{% if property.property_type.name == 'new_flat' or property.property_type.name == 'resale_flat' %}
     <div class="bg-gray-50 p-4 rounded-lg">
         <div class="text-xs md:text-sm text-gray-500">Отделка</div>
         <div class="text-lg md:text-xl font-bold">
             {{ property.has_finishing|yesno:"С отделкой,Без отделки" }}
         </div>
     </div>
+    {% endif %}
 
-    <!-- Статус -->
+    <!-- Статус сдачи -->
+    {% if property.property_type.name == 'new_flat' %}
     <div class="bg-gray-50 p-4 rounded-lg">
         <div class="text-xs md:text-sm text-gray-500">Статус</div>
         <div class="text-lg md:text-xl font-bold">
             {{ property.is_delivered|yesno:"Сдан,Не сдан" }}
         </div>
     </div>
+    {% endif %}
 </div>
 
                 <!-- Описание объекта -->

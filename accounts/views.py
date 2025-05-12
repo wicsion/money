@@ -185,13 +185,15 @@ def dashboard_view(request):
         context['developer_properties'] = user.created_properties.filter(is_approved=True)
     elif user.user_type == User.UserType.CLIENT:
         if active_tab == 'properties':
-            # Исправленный запрос для избранных объектов
             context['favorite_properties'] = Favorite.objects.filter(
                 user=request.user,
-                property__isnull=False
+                favorite_type='client'
             ).select_related('property')
         else:
-            context['broker_favorites'] = user.broker_favorites.all()
+            context['broker_favorites'] = Favorite.objects.filter(
+                user=request.user,
+                favorite_type='broker'
+            ).select_related('broker')
 
     if user.is_broker:
         context.update({
@@ -251,30 +253,49 @@ class PropertyCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('dashboard')
 
 
+# views.py (исправленная версия)
 class ToggleFavoriteView(LoginRequiredMixin, View):
     def post(self, request):
         obj_type = request.POST.get('type')
         obj_id = request.POST.get('id')
+        redirect_url = request.POST.get('next', '/')
 
-        if obj_type == 'property':
-            obj = get_object_or_404(Property, id=obj_id)
-            favorite, created = Favorite.objects.get_or_create(
-                user=request.user,
-                property=obj
-            )
+        try:
+            if obj_type == 'property':
+                obj = get_object_or_404(Property, id=obj_id)
+                favorite, created = Favorite.objects.get_or_create(
+                    user=request.user,
+                    property=obj,
+                    favorite_type='client'
+                )
+            elif obj_type == 'broker':
+                broker_user = get_object_or_404(User, id=obj_id, user_type=User.UserType.BROKER)
+                favorite, created = Favorite.objects.get_or_create(
+                    user=request.user,
+                    broker=broker_user,
+                    favorite_type='broker'
+                )
+            else:
+                messages.error(request, "Неверный тип объекта")
+                return redirect(redirect_url)
+
             if not created:
                 favorite.delete()
+                messages.success(request, "Успешно удалено из избранного")
+            else:
+                messages.success(request, "Успешно добавлено в избранное")
 
-        elif obj_type == 'broker':
-            broker = get_object_or_404(User, id=obj_id)
-            favorite, created = Favorite.objects.get_or_create(
-                user=request.user,
-                broker=broker
-            )
-            if not created:
-                favorite.delete()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'status': 'ok',
+                    'action': 'removed' if not created else 'added'
+                })
 
-        return JsonResponse({'status': 'ok'})
+            return redirect(redirect_url)
+
+        except Exception as e:
+            messages.error(request, f"Ошибка: {str(e)}")
+            return redirect(redirect_url)
 
 def load_properties(request):
     broker_id = request.GET.get('broker_id')
@@ -659,54 +680,59 @@ class CompleteBrokerInfoView(LoginRequiredMixin, UpdateView):
 
 class DirectContactBrokerConsultView(LoginRequiredMixin, View):
     def get(self, request, pk):
-        # Проверяем тип пользователя через user_type
         if request.user.user_type != User.UserType.CLIENT:
             messages.error(request, "Только клиенты могут отправлять запросы")
-            return redirect(request.META.get('HTTP_REFERER', 'home'))  # Возвращаем обратно
+            return redirect(request.META.get('HTTP_REFERER', 'home'))
 
         broker = get_object_or_404(User, pk=pk, user_type=User.UserType.BROKER)
 
-        # Создание запроса
+        # Создаем запрос с явным указанием property=None
         contact_request, created = ContactRequest.objects.get_or_create(
             requester=request.user,
             broker=broker,
-            property=None,
-            defaults={'status': 'new'}
+            defaults={
+                'status': 'new',
+                'property': None  # Явное указание на консультацию
+            }
         )
 
         return redirect('contact_request_detail', pk=contact_request.pk)
-
 
 class SubmitReviewView(LoginRequiredMixin, View):
     def post(self, request, pk):
         contact_request = get_object_or_404(ContactRequest, pk=pk)
         broker_profile = contact_request.broker.broker_profile
 
+        # Проверка условий
         if not (
             contact_request.status == 'completed'
             and request.user == contact_request.requester
+            and not BrokerReview.objects.filter(contact_request=contact_request).exists()
         ):
-            return HttpResponseForbidden()
+            return HttpResponseForbidden("Недостаточно прав для отправки отзыва")
 
-        # Проверяем существование отзыва через связь ContactRequest
+        # Обработка формы
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment')
+
+        if not rating or not comment:
+            messages.error(request, "Заполните все поля")
+            return redirect('contact_request_detail', pk=pk)
+
         try:
-            review = contact_request.review  # Используем OneToOne связь
-            form = BrokerReviewForm(request.POST, instance=review)
-            action = 'updated'
-        except BrokerReview.DoesNotExist:
-            form = BrokerReviewForm(request.POST)
-            action = 'created'
-
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.broker = broker_profile
-            review.client = request.user
-            review.contact_request = contact_request  # Устанавливаем связь
-            review.save()
-
+            # Создаем отзыв
+            review = BrokerReview.objects.create(
+                broker=broker_profile,
+                client=request.user,
+                contact_request=contact_request,
+                rating=rating,
+                comment=comment,
+                is_approved=True  # Если требуется модерация - установите False
+            )
             broker_profile.update_rating()
-            messages.success(request, f"Отзыв успешно {action}!")
-        else:
-            messages.error(request, "Ошибка при сохранении отзыва")
+            messages.success(request, "Отзыв успешно отправлен!")
+        except Exception as e:
+            messages.error(request, f"Ошибка: {str(e)}")
 
         return redirect('contact_request_detail', pk=pk)
+
