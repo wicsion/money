@@ -73,6 +73,13 @@ class BrokerProfile(models.Model):
 
     active_properties.short_description = _('Активные объекты')
 
+    def update_rating(self):
+        approved_reviews = self.reviews.filter(is_approved=True)
+        if approved_reviews.exists():
+            avg_rating = approved_reviews.aggregate(models.Avg('rating'))['rating__avg']
+            self.rating = round(avg_rating, 1)
+            self.save()
+
 
 class BrokerReview(models.Model):
     """Отзывы о брокерах"""
@@ -115,7 +122,7 @@ class BrokerReview(models.Model):
         verbose_name = _('Отзыв о брокере')
         verbose_name_plural = _('Отзывы о брокерах')
         ordering = ['-created_at']
-        unique_together = ('broker', 'client')
+        unique_together = ('contact_request',)
 
     def __str__(self):
         return f"Отзыв {self.client} для {self.broker} ({self.rating}/5)"

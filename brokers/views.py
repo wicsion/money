@@ -70,9 +70,9 @@ class BrokerDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Используем self.object (BrokerProfile), а не self.object.user (User)
+        context['reviews'] = self.object.reviews.filter(is_approved=True)
         context['broker_properties'] = Property.objects.filter(
-            broker=self.object,  # Передаем BrokerProfile, а не User
+            broker=self.object,
             status='active',
             is_approved=True
         )[:4]

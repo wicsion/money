@@ -228,23 +228,29 @@
                         <i class="fas fa-star text-yellow-400/80"></i>
                         Отзывы
                     </h3>
-                    {% for review in user.reviews.all %}
-                        <div class="profile-card mt-3 lg:mt-4">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
-                                <div class="flex items-center gap-2">
-                                    <img src="{{ review.client.avatar.url }}" class="w-8 h-8 rounded-full object-cover">
-                                    <strong class="text-sm lg:text-base">{{ review.client.get_full_name }}</strong>
-                                </div>
-                                <span class="text-yellow-400 text-sm lg:text-base">★ {{ review.rating }}/5</span>
-                            </div>
-                            <p class="text-xs lg:text-sm">{{ review.comment }}</p>
-                        </div>
-                    {% empty %}
-                        <div class="text-center text-gray-500 py-3 lg:py-4">
-                            <i class="fas fa-comment-slash text-xl lg:text-2xl"></i>
-                            <p class="text-sm lg:text-base mt-2">Нет отзывов</p>
-                        </div>
-                    {% endfor %}
+                    {% for review in user.broker_profile.reviews.all %}
+<div class="profile-card mt-3 lg:mt-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
+        <div class="flex items-center gap-2">
+            {% if review.client.avatar %}
+                <img src="{{ review.client.avatar.url }}" class="w-8 h-8 rounded-full object-cover">
+            {% else %}
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-blue-500"></i>
+                </div>
+            {% endif %}
+            <strong class="text-sm lg:text-base">{{ review.client.get_full_name }}</strong>
+        </div>
+        <div class="flex items-center gap-1 text-yellow-400">
+            {% for i in "12345" %}
+                <i class="fas fa-star{% if forloop.counter > review.rating %}-half-alt{% endif %}"></i>
+            {% endfor %}
+            <span class="text-sm">({{ review.rating }}/5)</span>
+        </div>
+    </div>
+    <p class="text-xs lg:text-sm mt-2">{{ review.comment }}</p>
+</div>
+{% endfor %}
                 </div>
             {% endif %}
         </div>

@@ -296,7 +296,11 @@ class ContactRequestDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['chat_messages'] = self.object.messages.all()  # Переименовано
+        context['chat_messages'] = self.object.messages.all().order_by('created_at')
+        context['has_review'] = BrokerReview.objects.filter(
+            contact_request=self.object,
+            client=self.object.requester
+        ).exists()
         return context
 
 
@@ -354,16 +358,16 @@ class MessageCreateView(LoginRequiredMixin, CreateView):
         contact_request = get_object_or_404(ContactRequest, pk=self.kwargs['pk'])
         form.instance.contact_request = contact_request
         form.instance.sender = self.request.user
-        return super().form_valid(form)
+        self.object = form.save()  # Сохраняем объект перед рендерингом
+        return render(self.request, 'accounts/partials/message.html', {'message': self.object})
 
-    def get_success_url(self):
-        return reverse('contact_request_detail', kwargs={'pk': self.kwargs['pk']})
+
+    def form_invalid(self, form):
+        return JsonResponse({'errors': form.errors}, status=400)
 
     def dispatch(self, request, *args, **kwargs):
-        contact_request = get_object_or_404(ContactRequest, pk=self.kwargs['pk'])
-        if contact_request.status == 'completed':
-            messages.error(request, "Чат завершен, отправка сообщений невозможна")
-            return redirect('contact_request_detail', pk=contact_request.pk)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return super().dispatch(request, *args, **kwargs)
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -676,22 +680,33 @@ class DirectContactBrokerConsultView(LoginRequiredMixin, View):
 class SubmitReviewView(LoginRequiredMixin, View):
     def post(self, request, pk):
         contact_request = get_object_or_404(ContactRequest, pk=pk)
+        broker_profile = contact_request.broker.broker_profile
 
-        # Проверка условий
-        if not (contact_request.status == 'completed' and
-                request.user == contact_request.requester and
-                not hasattr(contact_request, 'review')):
+        if not (
+            contact_request.status == 'completed'
+            and request.user == contact_request.requester
+        ):
             return HttpResponseForbidden()
 
-        form = BrokerReviewForm(request.POST)
+        # Проверяем существование отзыва через связь ContactRequest
+        try:
+            review = contact_request.review  # Используем OneToOne связь
+            form = BrokerReviewForm(request.POST, instance=review)
+            action = 'updated'
+        except BrokerReview.DoesNotExist:
+            form = BrokerReviewForm(request.POST)
+            action = 'created'
+
         if form.is_valid():
             review = form.save(commit=False)
-            review.broker = contact_request.broker.broker_profile
+            review.broker = broker_profile
             review.client = request.user
-            review.contact_request = contact_request
+            review.contact_request = contact_request  # Устанавливаем связь
             review.save()
 
-            # Обновляем рейтинг брокера
-            review.broker.update_rating()
+            broker_profile.update_rating()
+            messages.success(request, f"Отзыв успешно {action}!")
+        else:
+            messages.error(request, "Ошибка при сохранении отзыва")
 
         return redirect('contact_request_detail', pk=pk)
