@@ -159,19 +159,22 @@
                 </div>
 
                 <div class="reviews-list space-y-6">
-                    {% for review in reviews|slice:":3" %}
-                    <div class="review-item bg-gray-50 rounded-xl p-4 border-2 border-gray-100">
-                        <div class="review-header flex justify-between items-start mb-3">
-                            <div>
-                                <h4 class="font-semibold text-gray-800">{{ review.client.get_full_name }}</h4>
-                                <p class="text-sm text-gray-500">{{ review.created_at|date:"d.m.Y" }}</p>
-                            </div>
-                            <div class="review-stars flex text-yellow-400">
-                                {% for i in "12345" %}
-                                <i class="bi bi-star{% if i|add:0 <= review.rating %}-fill{% endif %}"></i>
-                                {% endfor %}
-                            </div>
-                        </div>
+        {% for review in reviews|slice:":3" %}
+        <div class="review-item bg-gray-50 rounded-xl p-4 border-2 border-gray-100">
+            <div class="review-header flex justify-between items-start mb-3">
+                <div>
+                    <h4 class="font-semibold text-gray-800">{{ review.client.first_name }}</h4>
+                    <p class="text-sm text-gray-500">{{ review.created_at|date:"d.m.Y" }}</p>
+                </div>
+                <div class="flex items-center gap-2 text-yellow-400">
+                    <div class="stars flex">
+                        {% for i in "12345" %}
+                        <i class="fas fa-star{% if forloop.counter > review.rating %}-half-alt{% endif %}"></i>
+                        {% endfor %}
+                    </div>
+                    <span class="text-sm font-medium">({{ review.rating }}/5)</span>
+                </div>
+            </div>
                         <p class="text-gray-600 leading-relaxed">{{ review.comment }}</p>
                     </div>
                     {% empty %}
