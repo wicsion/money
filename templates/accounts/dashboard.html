@@ -374,71 +374,75 @@
                         </div>
 
                     {% elif active_tab == 'brokers' %}
-    <div class="space-y-4">
-        {% for fav in broker_favorites %}
-            <div class="profile-card">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4">
-                    <!-- Аватар брокера -->
-                    <div class="w-16 h-16 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-blue-200">
-                        {% if fav.broker.avatar %}
-                            <img src="{{ fav.broker.avatar.url }}"
-                                class="w-full h-full object-cover"
-                                alt="{{ fav.broker.get_full_name }}">
-                        {% else %}
-                            <div class="w-full h-full bg-blue-50 flex items-center justify-center">
-                                <i class="fas fa-user text-blue-400 text-xl"></i>
-                            </div>
-                        {% endif %}
-                    </div>
+                        <div class="space-y-4">
+                            {% for fav in broker_favorites %}
+                                <div class="profile-card">
+                                    <div class="flex items-center gap-4 p-4">
+                                        <!-- Аватар брокера -->
+                                        <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-blue-200">
+                                            {% if fav.broker.avatar %}
+                                                <img src="{{ fav.broker.avatar.url }}"
+                                                     class="w-full h-full object-cover"
+                                                     alt="{{ fav.broker.get_full_name }}">
+                                            {% else %}
+                                                <div class="w-full h-full bg-blue-50 flex items-center justify-center">
+                                                    <i class="fas fa-user text-blue-400 text-xl"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
 
-                    <!-- Информация о брокере -->
-                    <div class="flex-1 sm:flex-none sm:flex-1">
-                        <h4 class="font-semibold text-lg">
-                            <a href="{% url 'broker-detail' pk=fav.broker.broker_profile.pk %}"
-                               class="hover:text-blue-600 transition-colors">
-                                {{ fav.broker.get_full_name }}
-                            </a>
-                        </h4>
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 text-sm text-gray-600 mt-1">
-                            <span>⭐ {{ fav.broker.broker_profile.rating|default:"-" }}/5</span>
-                            <span class="hidden sm:inline">•</span>
-                            <span>Лицензия №{{ fav.broker.broker_profile.license_number }}</span>
+                                        <!-- Информация о брокере -->
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-lg">
+                                                <a href="{% url 'broker-detail' pk=fav.broker.broker_profile.pk %} "
+                                                   class="hover:text-blue-600 transition-colors">
+                                                    {{ fav.broker.get_full_name }}
+                                                </a>
+                                            </h4>
+                                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                                <span>⭐ {{ fav.broker.broker_profile.rating|default:"-" }}/5</span>
+                                                <span>•</span>
+                                                <span>Лицензия №{{ fav.broker.broker_profile.license_number }}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Кнопки действий -->
+                                        <div class="flex items-center gap-3 ml-auto">
+                                            <!-- Кнопка "Написать" -->
+
+                <!-- Кнопка "Написать" как в "Моих запросах" -->
+                <a href="{% url 'contact_broker_consult' pk=fav.broker.id %}"
+                   class="btn-custom">
+                    <i class="fas fa-comment-dots mr-2"></i>
+                    Написать
+                </a>
+
+                                            <!-- Кнопка удаления -->
+                                             <!-- Кнопка удаления с подтверждением -->
+               <form method="POST"
+      action="{% url 'toggle_favorite' %}"
+      class="ml-2"
+      onsubmit="return confirm('Удалить брокера из избранного?')">
+    {% csrf_token %}
+    <input type="hidden" name="type" value="broker">
+    <input type="hidden" name="id" value="{{ fav.broker.id }}">
+    <button type="submit"
+            class="px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors favorite-btn relative overflow-hidden">
+        <i class="fas fa-trash"></i>
+    </button>
+</form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="text-center py-6 text-gray-500">
+                                    <i class="fas fa-user-slash text-2xl lg:text-3xl"></i>
+                                    <p class="text-sm lg:text-base mt-2">Нет избранных риелторов</p>
+                                </div>
+                            {% endfor %}
                         </div>
-                    </div>
-
-                    <!-- Кнопки действий -->
-                    <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3 sm:mt-0">
-                        <a href="{% url 'contact_broker_consult' pk=fav.broker.id %}"
-                           class="btn-custom w-full sm:w-auto text-center">
-                            <i class="fas fa-comment-dots mr-2"></i>
-                            Написать
-                        </a>
-
-                        <form method="POST"
-                              action="{% url 'toggle_favorite' %}"
-                              class="w-full sm:w-auto"
-                              onsubmit="return confirm('Удалить брокера из избранного?')">
-                            {% csrf_token %}
-                            <input type="hidden" name="type" value="broker">
-                            <input type="hidden" name="id" value="{{ fav.broker.id }}">
-                            <button type="submit"
-                                    class="w-full sm:w-auto px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors favorite-btn">
-                                <i class="fas fa-trash mr-2 sm:mr-0"></i>
-                                <span class="sm:hidden">Удалить</span>
-                            </button>
-                        </form>
-                    </div>
+                    {% endif %}
                 </div>
-            </div>
-        {% empty %}
-            <div class="text-center py-6 text-gray-500">
-                <i class="fas fa-user-slash text-2xl lg:text-3xl"></i>
-                <p class="text-sm lg:text-base mt-2">Нет избранных риелторов</p>
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
-                    </div>
 
                 <!-- Мои запросы -->
                 <div class="dashboard-section p-4 lg:p-8">
@@ -692,10 +696,15 @@
                                         </div>
 
                                         {% if req.property %}
-                                        <div class="mt-2 lg:mt-3 flex items-center gap-2 text-xs lg:text-sm text-blue-600">
-                                            <i class="fas fa-home"></i>
-                                            <span>{{ req.property.title }}</span>
-                                        </div>
+                <div class="mt-2 lg:mt-3 flex items-center gap-2 text-xs lg:text-sm text-blue-600">
+                    <i class="fas fa-home"></i>
+                    <span>{{ req.property.title }}</span>
+                </div>
+                {% else %}
+                <div class="mt-2 lg:mt-3 flex items-center gap-2 text-xs lg:text-sm text-blue-600">
+                    <i class="fas fa-comments mr-1"></i>
+                    Консультация
+                    </div>
                                         {% endif %}
                                     </div>
 

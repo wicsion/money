@@ -52,6 +52,27 @@
 .rating-stars label.hovered i {
     -webkit-text-stroke: 1px #f59e0b;
 }
+.rating-stars label {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rating-stars label i {
+    color: #d1d5db;
+    -webkit-text-stroke: 1px transparent;
+}
+
+.rating-stars label:hover i,
+.rating-stars label.hovered i {
+    color: #f59e0b !important;
+    -webkit-text-stroke: 1px #f59e0b;
+}
+
+.rating-stars input:checked ~ label i,
+.rating-stars label.active-star i {
+    color: #f59e0b !important;
+    -webkit-text-stroke: 1px #f59e0b;
+}
 </style>
 
 
@@ -238,41 +259,44 @@
     const container = document.querySelector('.chat-messages-container');
     if (container) container.scrollTop = container.scrollHeight;
 
-    // Обработка рейтинга звёзд
-    document.querySelectorAll('.rating-stars label').forEach(label => {
-        // Hover эффект
-        label.addEventListener('mouseover', function() {
-            const hoverValue = parseInt(this.htmlFor.split('-')[1]);
-            document.querySelectorAll('.rating-stars label').forEach(l => {
-                const starNumber = parseInt(l.htmlFor.split('-')[1]);
-                l.classList.toggle('hovered', starNumber <= hoverValue);
-            });
-        });
-
-        label.addEventListener('mouseleave', () => {
-            document.querySelectorAll('.rating-stars label').forEach(l => {
-                l.classList.remove('hovered');
-            });
+  // Обновленный обработчик рейтинга
+document.querySelectorAll('.rating-stars label').forEach(label => {
+    // Ховер-эффект
+    label.addEventListener('mouseenter', function() {
+        const hoverValue = parseInt(this.htmlFor.split('-')[1]);
+        document.querySelectorAll('.rating-stars label').forEach(l => {
+            const starNumber = parseInt(l.htmlFor.split('-')[1]);
+            l.classList.toggle('hovered', starNumber <= hoverValue);
         });
     });
 
-    // Обработка выбора рейтинга
-    document.querySelectorAll('.rating-stars input[type="radio"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const selectedValue = parseInt(this.value);
-
-            // Сброс предыдущего выбора
-            document.querySelectorAll('.rating-stars label').forEach(label => {
-                label.classList.remove('active-star');
-            });
-
-            // Установка нового состояния
-            document.querySelectorAll('.rating-stars label').forEach(label => {
-                const starNumber = parseInt(label.htmlFor.split('-')[1]);
-                label.classList.toggle('active-star', starNumber <= selectedValue);
-            });
+    label.addEventListener('mouseleave', () => {
+        document.querySelectorAll('.rating-stars label').forEach(l => {
+            l.classList.remove('hovered');
         });
     });
+
+    // Клик
+    label.addEventListener('click', function() {
+        const selectedValue = parseInt(this.htmlFor.split('-')[1]);
+        document.querySelectorAll('.rating-stars label').forEach(l => {
+            const starNumber = parseInt(l.htmlFor.split('-')[1]);
+            l.classList.toggle('active-star', starNumber <= selectedValue);
+        });
+    });
+});
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', () => {
+    const checked = document.querySelector('.rating-stars input:checked');
+    if (checked) {
+        const selectedValue = parseInt(checked.value);
+        document.querySelectorAll('.rating-stars label').forEach(label => {
+            const starNumber = parseInt(label.htmlFor.split('-')[1]);
+            label.classList.toggle('active-star', starNumber <= selectedValue);
+        });
+    }
+});
 
     // Инициализация рейтинга при загрузке
     document.addEventListener('DOMContentLoaded', () => {

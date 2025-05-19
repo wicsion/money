@@ -19,6 +19,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1',       # Стандартный локальный адрес
 ]
 
+
+CORS_ALLOW_ALL_ORIGINS = True
+
 # Настройки приложений
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -54,6 +57,7 @@ MIDDLEWARE = [
     'accounts.middleware.ActivityLoggerMiddleware',
     'accounts.middleware.ProfileCompletionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'real_estate_portal.urls'
