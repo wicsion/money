@@ -14,9 +14,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-ваш-резерв
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = [
-    '192.168.50.98',  # Ваш локальный IP
-    'localhost',       # Для доступа через localhost
-    '127.0.0.1',       # Стандартный локальный адрес
+    https://wicsion.github.io/money/       
 ]
 
 
