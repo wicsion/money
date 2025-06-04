@@ -9,12 +9,6 @@ class PropertyImageInline(admin.TabularInline):
     ordering = ('order',)
 
 
-class PropertyImageInline(admin.TabularInline):
-    model = PropertyImage
-    extra = 1
-    fields = ('image', 'order')
-    ordering = ('order',)
-
 
 @admin.register(Property)
 class PropertyAdmin(admin.ModelAdmin):
@@ -67,3 +61,8 @@ class PropertyImageAdmin(admin.ModelAdmin):
 @admin.action(description='Одобрить выбранные объекты')
 def approve_properties(modeladmin, request, queryset):
     queryset.update(is_approved=True)
+
+@admin.register(PropertyType)
+class PropertyTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description', 'icon')  # Поля для отображения
+    search_fields = ('name',)

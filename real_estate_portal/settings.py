@@ -11,10 +11,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Безопасность
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-ваш-резервный-ключ-для-разработки')
 
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = False
 
 ALLOWED_HOSTS = [
-    https://wicsion.github.io/money/       
+   '*'
 ]
 
 
