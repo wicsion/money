@@ -121,11 +121,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Кастомная модель пользователя
 AUTH_USER_MODEL = 'accounts.User'
 
-
 # URL перенаправления
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
+
+
+
 
 # Настройки почты
 
