@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv  # Для загрузки переменных окружения
-import sys
+
 # Загрузка переменных окружения из файла .env
 load_dotenv()
 
@@ -158,6 +158,4 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
-if 'npm' in ' '.join(sys.argv):
-    print("Error: This is a Django project, not a Node.js project")
-    sys.exit(1)
+
