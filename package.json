@@ -1,10 +1,13 @@
 {
-  "name": "django-real-estate",
+  "name": "money-frontend",
   "version": "1.0.0",
-  "private": true,
-  "description": "This project does not use Node.js",
   "scripts": {
-    "start": "echo 'This is a Django project, not a Node.js project' && exit 0"
+    "build": "npx tailwindcss -i ./static/css/input.css -o ./static/css/output.css --minify",
+    "watch": "npx tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch"
   },
-  "dependencies": {}
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.31",
+    "autoprefixer": "^10.4.16"
+  }
 }
