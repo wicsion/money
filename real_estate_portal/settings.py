@@ -157,5 +157,7 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-
+if os.path.exists('package.json'):
+    with open('package.json', 'w') as f:
+        f.write('{"private": true, "scripts": {}}')
 
