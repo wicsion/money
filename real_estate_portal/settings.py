@@ -1,3 +1,4 @@
+import sys
 import os
 from pathlib import Path
 from dotenv import load_dotenv  # Для загрузки переменных окружения
@@ -7,12 +8,13 @@ load_dotenv()
 
 # Базовые директории
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.append(str(BASE_DIR))
 
 # Безопасность
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-ваш-резервный-ключ-для-разработки')
 
 DEBUG = False
-
+handler500 = 'accounts.views.server_error'
 ALLOWED_HOSTS = ['*']
 
 
@@ -20,6 +22,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # Настройки приложений
 INSTALLED_APPS = [
+    'accounts.apps.AccountsConfig',
+    'brokers.apps.BrokersConfig',
+    'developers.apps.DevelopersConfig',
+    'clients.apps.ClientsConfig',
+    'properties.apps.PropertiesConfig',
+    'payments.apps.PaymentsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -33,13 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 
 
-    # Локальные приложения
-    'accounts.apps.AccountsConfig',
-    'brokers.apps.BrokersConfig',
-    'developers.apps.DevelopersConfig',
-    'clients.apps.ClientsConfig',
-    'properties.apps.PropertiesConfig',
-    'payments.apps.PaymentsConfig',
+
+
 ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MIDDLEWARE = [
