@@ -1,6 +1,14 @@
 {
   "build": {
-    "builder": "docker",
-    "disableNode": true
+    "builder": "nixpacks",
+    "config": {
+      "disableNode": true,
+      "providers": {
+        "python": {
+          "installCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput",
+          "startCommand": "gunicorn real_estate_portal.wsgi --bind 0.0.0.0:$PORT"
+        }
+      }
+    }
   }
 }
