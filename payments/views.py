@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.urls import reverse
 from yookassa import Configuration, Payment
 from django.conf import settings
-from .models import User
 
 # Настройка конфигурации ЮKassa
 Configuration.account_id = settings.YOOMONEY_ACCOUNT_ID
