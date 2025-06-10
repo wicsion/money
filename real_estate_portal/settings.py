@@ -1,26 +1,31 @@
 import sys
 import os
 from pathlib import Path
-from dotenv import load_dotenv  # Для загрузки переменных окружения
+from dotenv import load_dotenv
 
-# Загрузка переменных окружения из файла .env
+
 load_dotenv()
 
-# Базовые директории
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR))
 
-# Безопасность
+
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-ваш-резервный-ключ-для-разработки')
 
 DEBUG = False
 handler500 = 'accounts.views.server_error'
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['winwindeal.up.railway.app']
 
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-# Настройки приложений
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'https://winwindeal.up.railway.app'
+]
+
+
 INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'brokers.apps.BrokersConfig',
@@ -62,7 +67,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'real_estate_portal.urls'
 
-# Настройки шаблонов
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -122,7 +127,7 @@ AUTHENTICATION_BACKENDS = [
 
 FILE_UPLOAD_PERMISSIONS = 0o644
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10*1024*1024
-# Интернационализация
+
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
@@ -132,26 +137,31 @@ USE_TZ = True
 # Статические файлы
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']  # Для разработки
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Для продакшена (collectstatic)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+if not DEBUG:
+    # Настройки для облачного хранилища
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_QUERYSTRING_AUTH = False
 
-# Медиа файлы
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Кастомная модель пользователя
 AUTH_USER_MODEL = 'accounts.User'
 
-# URL перенаправления
+
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
+CSRF_TRUSTED_ORIGINS = ['https://winwindeal.up.railway.app']
 
 
-
-
-# Настройки почты
-
-# Настройки почты
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
