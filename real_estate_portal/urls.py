@@ -11,6 +11,7 @@ urlpatterns = [
     path('', home_view, name='home'),
     path('accounts/', include('accounts.urls')),
     path('brokers/', include('brokers.urls')),
+    path('payments/', include('payments.urls')),
     path('developers/', include('developers.urls')),
     path('properties/', include('properties.urls')),
     path('password_reset/',
