@@ -1,8 +1,8 @@
 from django.urls import path
-from . import views
+from.views import payment_topup_view, payment_success_view
+
 
 urlpatterns = [
-    path('process/', views.process_payment, name='process_payment'),
-    path('callback/', views.payment_callback, name='payment_callback'),
-    path('process/listing/<int:pk>/', views.process_listing_payment, name='process_listing_payment'),
+    path('payment/topup/', payment_topup_view, name='payment_topup'),
+    path('payment/success/', payment_success_view, name='payment_success'),
 ]

@@ -27,6 +27,13 @@ class User(AbstractUser):
 
     verification_token = models.CharField(max_length=100, blank=True, null=True, verbose_name='Токен верификации')
 
+    balance = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        verbose_name='Баланс'
+    )
+
     @property
     def is_profile_complete(self):
         if self.user_type == User.UserType.BROKER:

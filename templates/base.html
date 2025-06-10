@@ -6,10 +6,29 @@
     <title>{% block title %}WinWinDeal{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Добавленные стили для бейджа и кнопки */
+        .bonus-badge {
+            background: linear-gradient(45deg, #fcd34d, #fbbf24);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .bonus-badge:hover {
+            transform: scale(1.05);
+        }
+        .topup-btn {
+            background: linear-gradient(45deg, #10b981, #059669);
+            transition: all 0.3s;
+        }
+        .topup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-gray-50">
-          {% if messages %}
+    {% if messages %}
     <div class="fixed top-4 right-4 z-50 max-w-md w-full space-y-2">
         {% for message in messages %}
         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-lg relative" role="alert">
@@ -26,9 +45,7 @@
     </div>
     {% endif %}
 
-
-
-     <nav class="bg-blue-600 text-white shadow-lg">
+    <nav class="bg-blue-600 text-white shadow-lg">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <a href="{% url 'home' %}" class="text-2xl font-bold">WinWinDeal</a>
 
@@ -40,9 +57,18 @@
 
             <div class="flex items-center space-x-4">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'dashboard' %}" class="hover:text-blue-200">
-                        <i class="fas fa-user-circle text-xl"></i>
-                    </a>
+                    <div class="flex items-center space-x-3">
+                        <a href="{% url 'dashboard' %}" class="hover:text-blue-200 flex items-center">
+                            <i class="fas fa-user-circle text-xl mr-1"></i>
+                        </a>
+                        <span class="bonus-badge text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                            {{ user.bonus }} ₽
+                        </span>
+                        <a href="{% url 'payment_topup' %}"
+   class="topup-btn text-white px-3 py-1 rounded-lg text-sm font-medium">
+    Пополнить
+</a>
+                    </div>
                     <a href="{% url 'logout' %}" class="hover:text-blue-200">Выйти</a>
                 {% else %}
                     <a href="{% url 'login' %}" class="hover:text-blue-200">Войти</a>

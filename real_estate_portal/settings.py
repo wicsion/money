@@ -153,16 +153,17 @@ LOGIN_URL = 'login'
 
 # Настройки почты
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.yandex.ru'  # Корректный адрес
-EMAIL_PORT = 465               # Стандартный порт для SSL
-EMAIL_USE_SSL = True           # Обязательно для порта 465
-EMAIL_HOST_USER = 'goldinpav@yandex.ru'  # Полный email
-EMAIL_HOST_PASSWORD = 'mglkpkdkfapyubfa'  # Создан в аккаунте Яндекса
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'goldinpav@yandex.ru'
+EMAIL_HOST_PASSWORD = 'mglkpkdkfapyubfa'
 DEFAULT_FROM_EMAIL = 'WinWinDeal <goldinpav@yandex.ru>'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+YOOMONEY_ACCOUNT_ID = '4100119159902487'
+YOOMONEY_SECRET_KEY = '950BEB6F5D1B08B10CBDAAF4B51D615A918BE0187A99F2906ACFAE338F8164D4'
 
 
 class OwnerAdminMixin:
