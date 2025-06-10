@@ -1,44 +1,48 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
-from django.urls import reverse
 from yookassa import Configuration, Payment
 from django.conf import settings
 
-# Настройка конфигурации ЮKassa
+
+# Настройка должна быть глобальной (один раз при запуске приложения)
 Configuration.account_id = settings.YOOMONEY_ACCOUNT_ID
 Configuration.secret_key = settings.YOOMONEY_SECRET_KEY
 
 def payment_topup_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
     if request.method == 'POST':
-        amount = request.POST.get('amount')
-        if not amount or float(amount) <= 0:
-            messages.error(request, "Укажите корректную сумму")
+        try:
+            amount = float(request.POST.get('amount', 0))
+            if amount <= 0:
+                messages.error(request, "Сумма должна быть больше 0")
+                return redirect('payment_topup')
+
+            payment = Payment.create({
+                "amount": {
+                    "value": f"{amount:.2f}",
+                    "currency": "RUB"
+                },
+                "confirmation": {
+                    "type": "redirect",
+                    "return_url": request.build_absolute_uri(reverse('payment_success'))
+                },
+                "capture": True,
+                "description": f"Пополнение баланса для {request.user.username}",
+                "metadata": {
+                    "user_id": request.user.id
+                }
+            })
+
+            return redirect(payment.confirmation.confirmation_url)
+
+        except Exception as e:
+            messages.error(request, f"Ошибка при создании платежа: {str(e)}")
             return redirect('payment_topup')
-
-        # Создание платежа в ЮKassa
-        payment = Payment.create({
-            "amount": {
-                "value": amount,
-                "currency": "RUB"
-            },
-            "confirmation": {
-                "type": "redirect",
-                "return_url": request.build_absolute_uri(reverse('payment_success'))
-            },
-            "capture": True,
-            "description": f"Пополнение баланса для {request.user.username}",
-            "metadata": {
-                "user_id": request.user.id
-            }
-        })
-
-        # Перенаправляем пользователя на страницу оплаты
-        return redirect(payment.confirmation.confirmation_url)
 
     return render(request, 'payments/topup.html')
 
 def payment_success_view(request):
-    # Проверяем успешность платежа (можно через webhook)
-    user = request.user
-    messages.success(request, "Баланс успешно пополнен!")
+    messages.success(request, "Платеж успешно завершен! Баланс будет обновлен в ближайшее время.")
     return redirect('dashboard')
