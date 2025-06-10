@@ -4,7 +4,7 @@ from django.contrib import messages
 from yookassa import Configuration, Payment
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
-from yookassa import WebhookNotification
+from yookassa.domain.notification import WebhookNotification
 import json
 from django.conf import settings
 from django.contrib.auth import get_user_model
