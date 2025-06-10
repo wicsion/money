@@ -11,8 +11,25 @@
     <!-- Остальные стили -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" as="style">
+<link rel="preload" href="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- Предварительное соединение с CDN -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <style>
-       @font-face {
+        /* Критические стили для LCP элемента */
+  .hero h1 {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+    font-family: 'Inter', sans-serif;
+  }
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+
+        @font-face {
       font-family: 'Inter';
       font-style: normal;
       font-weight: 400;
