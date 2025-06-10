@@ -2,16 +2,15 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
 from yookassa import Configuration, Payment
-from django.conf import settings
-
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from yookassa import WebhookNotification
 import json
+from django.conf import settings
+from django.contrib.auth import get_user_model
 
-from accounts.models import User
 
-# Настройка должна быть глобальной (один раз при запуске приложения)
+User = get_user_model()
 Configuration.account_id = settings.YOOMONEY_ACCOUNT_ID
 Configuration.secret_key = settings.YOOMONEY_SECRET_KEY
 
