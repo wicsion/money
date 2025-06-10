@@ -1,8 +1,15 @@
+
 from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
 from yookassa import Configuration, Payment
 from django.conf import settings
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+from yookassa import WebhookNotification
+import json
+
+from accounts.models import User
 
 # Настройка должна быть глобальной (один раз при запуске приложения)
 Configuration.account_id = settings.YOOMONEY_ACCOUNT_ID
@@ -46,3 +53,45 @@ def payment_topup_view(request):
 def payment_success_view(request):
     messages.success(request, "Платеж успешно завершен! Баланс будет обновлен в ближайшее время.")
     return redirect('dashboard')
+
+
+@csrf_exempt
+def yookassa_webhook(request):
+    if request.method == 'POST':
+        # Получаем JSON из тела запроса
+        event_json = json.loads(request.body)
+
+        try:
+            # Проверяем подпись уведомления (важно для безопасности)
+            notification = WebhookNotification(event_json)
+
+            # Проверяем, что это уведомление о платеже
+            if notification.object.status == 'succeeded':
+                payment = notification.object
+                metadata = payment.metadata
+
+                if 'user_id' in metadata:
+                    user_id = metadata['user_id']
+                    amount = float(payment.amount.value)
+
+                    # Находим пользователя и пополняем баланс
+                    user = User.objects.get(id=user_id)
+                    user.balance += amount
+                    user.save()
+
+                    # Можно также создать запись в модели Payment
+                    Payment.objects.create(
+                        user=user,
+                        amount=amount,
+                        payment_method='yookassa',
+                        status='completed',
+                        transaction_id=payment.id
+                    )
+
+                    return HttpResponse(status=200)
+
+        except Exception as e:
+            # Логируем ошибку
+            print(f"Webhook error: {str(e)}")
+
+    return HttpResponse(status=400)
