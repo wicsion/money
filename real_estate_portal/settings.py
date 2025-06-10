@@ -134,15 +134,12 @@ USE_L10N = True
 USE_TZ = True
 
 
-STATICFILES_DIRS = [BASE_DIR / 'static']  # Для разработки
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-if not DEBUG:
-    # Для production на Railway
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    STATIC_URL = '/static/'
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'mediafiles'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -174,7 +171,6 @@ class OwnerAdminMixin:
             return qs
         return qs.filter(creator=request.user)
 
-# Дополнительные настройки для production
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
