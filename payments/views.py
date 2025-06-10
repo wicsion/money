@@ -8,8 +8,9 @@ from yookassa import WebhookNotification
 import json
 from django.conf import settings
 from django.contrib.auth import get_user_model
+import logging
 
-
+logger = logging.getLogger(__name__)
 User = get_user_model()
 Configuration.account_id = settings.YOOMONEY_ACCOUNT_ID
 Configuration.secret_key = settings.YOOMONEY_SECRET_KEY
@@ -56,6 +57,7 @@ def payment_success_view(request):
 
 @csrf_exempt
 def yookassa_webhook(request):
+    logger.info(f"Incoming webhook: {request.body}")
     if request.method == 'POST':
         # Получаем JSON из тела запроса
         event_json = json.loads(request.body)

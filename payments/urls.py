@@ -1,5 +1,5 @@
 from django.urls import path
-from.views import payment_topup_view, payment_success_view, yookassa_webhook
+from .views import payment_topup_view, payment_success_view, yookassa_webhook
 
 
 urlpatterns = [
