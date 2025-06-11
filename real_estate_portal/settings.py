@@ -138,8 +138,8 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+#MEDIA_URL = '/media/'
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -148,20 +148,19 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
 
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_DEFAULT_ACL = 'public-read'
+AWS_QUERYSTRING_AUTH = False
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
-AWS_QUERYSTRING_AUTH = False  # Убирает подпись URL для публичных файлов
-AWS_S3_FILE_OVERWRITE = False
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_ACCESS_KEY_ID = '4pF8eFgYeB4FiZTAzhv6cWfvdn6jjZ1ngvhZVB4ENdhC'  # Access Key ID
-AWS_SECRET_ACCESS_KEY = 'uX3njyrVjypcAphHqTsaPv'  # Secret Key
-AWS_STORAGE_BUCKET_NAME = 'winwindeal'  # Замените на имя бакета
+AWS_ACCESS_KEY_ID = '95bf86962b9e4d1d94958be095e5d901'  # Project ID
+AWS_SECRET_ACCESS_KEY = 'ваш_секретный_ключ_из_API'  # Создается отдельно в API-ключах
+AWS_STORAGE_BUCKET_NAME = 'winwindeal'  # Имя вашего бакета
 AWS_S3_ENDPOINT_URL = 'https://hb.ru-1.storage.cloud.mail.ru'
 AWS_S3_REGION_NAME = 'ru-1'
-AWS_S3_SIGNATURE_VERSION = 's3v4'
-AWS_DEFAULT_ACL = 'public-read'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
