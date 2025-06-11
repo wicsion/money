@@ -157,7 +157,7 @@ AWS_S3_OBJECT_PARAMETERS = {
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_ACCESS_KEY_ID = '95bf86962b9e4d1d94958be095e5d901'  # Project ID
-AWS_SECRET_ACCESS_KEY = 'ваш_секретный_ключ_из_API'  # Создается отдельно в API-ключах
+AWS_SECRET_ACCESS_KEY = 'fpwzZRsVN2jkAkUD9hvYQ5'
 AWS_STORAGE_BUCKET_NAME = 'winwindeal'  # Имя вашего бакета
 AWS_S3_ENDPOINT_URL = 'https://hb.ru-1.storage.cloud.mail.ru'
 AWS_S3_REGION_NAME = 'ru-1'
