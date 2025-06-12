@@ -26,7 +26,7 @@ from .views import (
     SubmitReviewView,
 
 )
-app_name = 'accounts'
+
 
 
 urlpatterns = [
