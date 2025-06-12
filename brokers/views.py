@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from .models import BrokerProfile, BrokerReview, ContactRequest
 from properties.forms import PropertyForm
-from accounts.models import Subscription, Favorite
+from accounts.models import Subscription, Favorite, User
 from properties.models import Property
 from .forms import BrokerProfileForm, BrokerReviewForm
 from django.utils import timezone
