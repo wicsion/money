@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-ваш-резерв
 
 DEBUG = False
 handler500 = 'accounts.views.server_error'
-ALLOWED_HOSTS = ['winwindeal.up.railway.app','money-yypy.onrender.com']
+ALLOWED_HOSTS = ['winwindeal.up.railway.app']
 
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -102,14 +102,18 @@ WSGI_APPLICATION = 'real_estate_portal.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'winwin_ocfj',
-        'USER': 'winwin_ocfj_user',
-        'PASSWORD': 'qpfjV1wtFozPvliLsXvNivhn6SFnamkT',
-        'HOST': 'dpg-d15ji1be5dus739oisq0-a',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('PGDATABASE', 'railway'),
+        'USER': os.getenv('PGUSER', 'postgres'),
+        'PASSWORD': os.getenv('PGPASSWORD', 'qwUAvTjFTpNyQfCEZCSVqbxTecEJRHCP'),
+        'HOST': os.getenv('PGHOST', 'postgres.railway.internal'),
+        'PORT': os.getenv('PGPORT', '5432'),
+        'OPTIONS': {
+            'client_encoding': 'UTF8',
+        }
     }
 }
+
 # Валидация паролей
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
