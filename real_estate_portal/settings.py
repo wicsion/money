@@ -103,14 +103,13 @@ WSGI_APPLICATION = 'real_estate_portal.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('PGDATABASE', 'railway'),  # 'railway' — значение по умолчанию
-        'USER': os.getenv('PGUSER', 'postgres'),
-        'PASSWORD': os.getenv('PGPASSWORD', 'qwUAvTjFTpNyQfCEZCSVqbxTecEJRHCP'),
-        'HOST': os.getenv('PGHOST', 'trolley.proxy.rlwy.net'),
-        'PORT': os.getenv('PGPORT', '15306'),
+        'NAME': 'winwin_ocfj',
+        'USER': 'winwin_ocfj_user',
+        'PASSWORD': 'qpfjV1wtFozPvliLsXvNivhn6SFnamkT',  # вставь сюда настоящий пароль
+        'HOST': 'dpg-d15ji1be5dus739oisq0-a',
+        'PORT': '5432',
     }
 }
-
 # Валидация паролей
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
