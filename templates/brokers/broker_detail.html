@@ -101,7 +101,7 @@
                         Лицензия №{{ broker.license_number }}
                     </div>
                     <div class="mt-4">
-   <a href="{% url 'accounts:direct_contact_broker_consult' pk=broker.user.id %}"
+   <a href="{% url 'direct_contact_broker_consult' pk=broker.user.id %}"
    class="bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors block"
    onclick="return confirm('С вашего счета будет списано 10 руб. за консультацию. Продолжить?')">
     Запросить консультацию (10 руб.)
