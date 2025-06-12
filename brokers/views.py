@@ -11,7 +11,9 @@ from properties.models import Property
 from .forms import BrokerProfileForm, BrokerReviewForm
 from django.utils import timezone
 from django.views.generic import TemplateView
-
+from django.shortcuts import redirect
+from django.contrib import messages
+from django.views import View
 
 
 
@@ -135,3 +137,38 @@ class BrokerDashboardView(LoginRequiredMixin, TemplateView):
         return context
 
 
+class DirectContactBrokerConsultView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        if not request.user.is_authenticated or request.user.user_type != 'client':
+            messages.error(request, "Только клиенты могут запрашивать консультации")
+            return redirect('home')
+
+        broker = get_object_or_404(BrokerProfile, pk=pk)
+
+        # Проверяем баланс пользователя
+        if request.user.balance < 10:
+            messages.error(request, "Недостаточно средств на балансе. Минимальная сумма консультации - 10 руб.")
+            return redirect('broker-detail', pk=pk)
+
+        # Создаем запрос на консультацию
+        contact_request = ContactRequest.objects.create(
+            requester=request.user,
+            broker=broker.user,
+            property=None,
+            status='pending',
+            payment_amount=10.00,
+            is_consultation=True
+        )
+
+        # Списание средств
+        try:
+            request.user.balance -= 10
+            request.user.save()
+            contact_request.status = 'paid'
+            contact_request.save()
+            messages.success(request, "Консультация успешно оплачена. 10 руб. списаны с вашего баланса")
+        except Exception as e:
+            messages.error(request, f"Ошибка при списании средств: {str(e)}")
+            return redirect('broker-detail', pk=pk)
+
+        return redirect('contact_request_detail', pk=contact_request.pk)
