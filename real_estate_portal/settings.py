@@ -102,17 +102,16 @@ WSGI_APPLICATION = 'real_estate_portal.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('PGDATABASE', 'railway'),
-        'USER': os.getenv('PGUSER', 'postgres'),
-        'PASSWORD': os.getenv('PGPASSWORD', 'qwUAvTjFTpNyQfCEZCSVqbxTecEJRHCP'),
-        'HOST': os.getenv('PGHOST', 'postgres.railway.internal'),
-        'PORT': os.getenv('PGPORT', '5432'),
-        'OPTIONS': {
-            'client_encoding': 'UTF8',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'qwUAvTjFTpNyQfCEZCSVqbxTecEJRHCP',
+        'HOST': 'trolley.proxy.rlwy.net',
+        'PORT': '15306',
+
         }
     }
-}
+
 
 # Валидация паролей
 AUTH_PASSWORD_VALIDATORS = [
