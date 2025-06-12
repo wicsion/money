@@ -65,4 +65,5 @@ urlpatterns = [
     path('contact-broker-consult/<int:pk>/', views.DirectContactBrokerConsultView.as_view(), name='contact_broker_consult'),
     path('contact-request/<int:pk>/submit-review/', SubmitReviewView.as_view(), name='submit_review'),
     path('toggle-favorite/', ToggleFavoriteView.as_view(), name='toggle_favorite'),
+
 ]
