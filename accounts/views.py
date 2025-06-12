@@ -688,23 +688,46 @@ class CompleteBrokerInfoView(LoginRequiredMixin, UpdateView):
 
 class DirectContactBrokerConsultView(LoginRequiredMixin, View):
     def get(self, request, pk):
+
+
+
         if request.user.user_type != User.UserType.CLIENT:
-            messages.error(request, "Только клиенты могут отправлять запросы")
-            return redirect(request.META.get('HTTP_REFERER', 'home'))
+            messages.error(request, "Только клиенты могут запрашивать консультации")
+            return redirect('home')
 
         broker = get_object_or_404(User, pk=pk, user_type=User.UserType.BROKER)
 
-        # Создаем запрос с явным указанием property=None
-        contact_request, created = ContactRequest.objects.get_or_create(
+        # Проверяем баланс пользователя
+        if request.user.balance < 10:
+            messages.error(request, "Недостаточно средств на балансе. Минимальная сумма консультации - 10 руб.")
+            return redirect('broker-detail', pk=pk)
+
+        # Создаем запрос на консультацию
+        contact_request = ContactRequest.objects.create(
             requester=request.user,
             broker=broker,
-            defaults={
-                'status': 'new',
-                'property': None  # Явное указание на консультацию
-            }
+            property=None,
+            status='new',
+            is_consultation=True
         )
 
-        return redirect('contact_request_detail', pk=contact_request.pk)
+        # Списание средств
+        try:
+            request.user.balance -= 10
+            request.user.save()
+
+            # Обновляем статус запроса после успешного списания
+            contact_request.status = 'in_progress'
+            contact_request.save()
+
+            messages.success(request, "Консультация успешно оплачена. 10 руб. списаны с вашего баланса")
+            return redirect('contact_request_detail', pk=contact_request.pk)
+
+        except Exception as e:
+            messages.error(request, f"Ошибка при списании средств: {str(e)}")
+            # Удаляем запрос, если не удалось списать средства
+            contact_request.delete()
+            return redirect('broker-detail', pk=pk)
 
 class SubmitReviewView(LoginRequiredMixin, View):
     def post(self, request, pk):
