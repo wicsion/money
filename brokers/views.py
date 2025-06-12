@@ -139,11 +139,11 @@ class BrokerDashboardView(LoginRequiredMixin, TemplateView):
 
 class DirectContactBrokerConsultView(LoginRequiredMixin, View):
     def get(self, request, pk):
-        if not request.user.is_authenticated or request.user.user_type != 'client':
+        if request.user.user_type != User.UserType.CLIENT:
             messages.error(request, "Только клиенты могут запрашивать консультации")
             return redirect('home')
 
-        broker = get_object_or_404(BrokerProfile, pk=pk)
+        broker = get_object_or_404(User, pk=pk, user_type=User.UserType.BROKER)
 
         # Проверяем баланс пользователя
         if request.user.balance < 10:
@@ -153,10 +153,9 @@ class DirectContactBrokerConsultView(LoginRequiredMixin, View):
         # Создаем запрос на консультацию
         contact_request = ContactRequest.objects.create(
             requester=request.user,
-            broker=broker.user,
+            broker=broker,
             property=None,
-            status='pending',
-            payment_amount=10.00,
+            status='new',
             is_consultation=True
         )
 
@@ -164,11 +163,16 @@ class DirectContactBrokerConsultView(LoginRequiredMixin, View):
         try:
             request.user.balance -= 10
             request.user.save()
-            contact_request.status = 'paid'
+
+            # Обновляем статус запроса после успешного списания
+            contact_request.status = 'in_progress'
             contact_request.save()
+
             messages.success(request, "Консультация успешно оплачена. 10 руб. списаны с вашего баланса")
+            return redirect('contact_request_detail', pk=contact_request.pk)
+
         except Exception as e:
             messages.error(request, f"Ошибка при списании средств: {str(e)}")
+            # Удаляем запрос, если не удалось списать средства
+            contact_request.delete()
             return redirect('broker-detail', pk=pk)
-
-        return redirect('contact_request_detail', pk=contact_request.pk)
