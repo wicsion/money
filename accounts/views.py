@@ -310,6 +310,12 @@ class ContactRequestDetailView(LoginRequiredMixin, DetailView):
     template_name = 'accounts/contact_request_detail.html'
     paginate_by = 50
 
+
+    def get(self, request, *args, **kwargs):
+        print("ContactRequestDetailView called!")  # Добавьте эту строку
+        return super().get(request, *args, **kwargs)
+
+
     def get_queryset(self):
         qs = super().get_queryset()
         return qs.filter(

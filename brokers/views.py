@@ -139,6 +139,9 @@ class BrokerDashboardView(LoginRequiredMixin, TemplateView):
 
 class DirectContactBrokerConsultView(LoginRequiredMixin, View):
     def get(self, request, pk):
+
+
+
         if request.user.user_type != User.UserType.CLIENT:
             messages.error(request, "Только клиенты могут запрашивать консультации")
             return redirect('home')

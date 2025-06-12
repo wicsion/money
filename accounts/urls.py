@@ -26,9 +26,11 @@ from .views import (
     SubmitReviewView,
 
 )
+app_name = 'accounts'
 
 
 urlpatterns = [
+    path('contact-request/<int:pk>/', ContactRequestDetailView.as_view(), name='contact_request_detail'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('register/', RegisterView.as_view(), name='register'),
@@ -43,7 +45,7 @@ urlpatterns = [
     path('toggle-favorite/', ToggleFavoriteView.as_view(), name='toggle_favorite'),
     path('broker/<int:pk>/contact/', ContactRequestView.as_view(), name='contact_broker'),
     path('contact-request/new/', ContactRequestView.as_view(), name='new_contact_request'),
-    path('contact-request/<int:pk>/', ContactRequestDetailView.as_view(), name='contact_request_detail'),
+
     path('contact-request/<int:pk>/status/<str:status>/', UpdateRequestStatusView.as_view(),name='update_request_status'),
     path('ajax/load-properties/', views.load_properties, name='load_properties'),
     path('subscribe/<int:developer_id>/', views.SubscribeView.as_view(), name='subscribe'),
@@ -64,6 +66,7 @@ urlpatterns = [
     path('complete-broker-info/', views.CompleteBrokerInfoView.as_view(), name='complete_broker_info'),
     path('contact-broker-consult/<int:pk>/', views.DirectContactBrokerConsultView.as_view(), name='contact_broker_consult'),
     path('contact-request/<int:pk>/submit-review/', SubmitReviewView.as_view(), name='submit_review'),
-    path('toggle-favorite/', ToggleFavoriteView.as_view(), name='toggle_favorite'),
+
+
 
 ]
