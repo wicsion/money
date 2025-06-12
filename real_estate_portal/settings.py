@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'django_filters',
     'widget_tweaks',
     'channels',
-    'django_extensions',
     'corsheaders',
     'django.contrib.humanize',
 
