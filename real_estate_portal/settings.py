@@ -105,7 +105,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'winwin_ocfj',
         'USER': 'winwin_ocfj_user',
-        'PASSWORD': 'qpfjV1wtFozPvliLsXvNivhn6SFnamkT',  # вставь сюда настоящий пароль
+        'PASSWORD': 'qpfjV1wtFozPvliLsXvNivhn6SFnamkT',
         'HOST': 'dpg-d15ji1be5dus739oisq0-a',
         'PORT': '5432',
     }
