@@ -55,6 +55,8 @@ class RegisterView(CreateView):
             user = form.save(commit=False)
             user.is_active = False
             user.verification_token = ''.join(random.choices(string.ascii_letters + string.digits, k=50))
+            # Начисляем 100 рублей на основной баланс
+            user.balance = 100.00  # Или user.balance += 100.00, если хотим добавлять к существующему
             user.save()
             self.send_verification_email(user)
             return redirect(self.success_url)
