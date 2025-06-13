@@ -2,12 +2,12 @@ from django.contrib import admin
 from django.urls import path, include
 from accounts.views import home_view
 from django.contrib.auth import views as auth_views
-from payments.views import yookassa_webhook  # Импортируем вебхук напрямую
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_view, name='home'),
-    path('yookassa-webhook/', yookassa_webhook, name='yookassa_webhook'),  # Прямой путь к вебхуку
+
     path('accounts/', include('accounts.urls')),
     path('brokers/', include('brokers.urls')),
     path('payments/', include('payments.urls')),  # Оставляем другие платежные URLs
