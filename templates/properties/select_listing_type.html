@@ -1,28 +1,124 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <style>
-    .listing-card {
+    /* Общие стили для обоих шаблонов */
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .step-badge {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    .step-active {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .step-inactive {
+        background: #e5e7eb;
+        color: #6b7280;
+    }
+
+    .type-card {
+        transition: all 0.3s ease;
         border: 2px solid #e5e7eb;
         border-radius: 1rem;
+        overflow: hidden;
+        background: white;
+        position: relative;
         padding: 2rem;
         margin-bottom: 1.5rem;
-        transition: all 0.3s ease;
     }
 
-    .listing-card:hover {
+    .type-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
         border-color: #3b82f6;
-        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
     }
 
-    .listing-card.premium {
+    .type-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: #3b82f6;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .type-card:hover::after {
+        opacity: 1;
+    }
+
+    .type-card.premium {
         border-color: #f59e0b;
         background: linear-gradient(to bottom right, #fff7ed, #fff);
     }
 
-    .listing-card.premium:hover {
+    .type-card.premium:hover {
         border-color: #f59e0b;
-        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.1);
+    }
+
+    .type-card.premium::after {
+        background: #f59e0b;
+    }
+
+    .type-icon {
+        font-size: 2.5rem;
+        color: #3b82f6;
+        margin-bottom: 1rem;
+    }
+
+    .type-card.premium .type-icon {
+        color: #f59e0b;
+    }
+
+    .type-title {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 1.25rem;
+    }
+
+    .type-description {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .selection-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .selection-title::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 3px;
+        background: #3b82f6;
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
     }
 
     .price-tag {
@@ -31,7 +127,7 @@
         color: #3b82f6;
     }
 
-    .premium .price-tag {
+    .type-card.premium .price-tag {
         color: #f59e0b;
     }
 
@@ -45,50 +141,89 @@
         display: inline-block;
         margin-bottom: 1rem;
     }
+
+    .duration-info {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+    }
+
+    .form-check-input {
+        width: 1.2em;
+        height: 1.2em;
+        margin-top: 0.2em;
+    }
+
+    .form-check-label {
+        margin-left: 0.5rem;
+    }
 </style>
 
 <div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <h2 class="text-center mb-5">Выберите тип размещения</h2>
-
-            <form method="post">
-                {% csrf_token %}
-
-                {% for choice in form.listing_type %}
-                <label class="d-block">
-                    <div class="listing-card {% if choice.data.value.instance.is_featured %}premium{% endif %}">
-                        {% if choice.data.value.instance.is_featured %}
-                        <span class="badge-premium">ПРЕМИУМ</span>
-                        {% endif %}
-
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h3 class="mb-0">{{ choice.data.value.instance.name }}</h3>
-                            <span class="price-tag">{{ choice.data.value.instance.price }} ₽</span>
-                        </div>
-
-                        <p class="text-muted mb-4">{{ choice.data.value.instance.description }}</p>
-
-                        <div class="form-check">
-                            {{ choice.tag }}
-                            <label class="form-check-label" for="{{ choice.id_for_label }}">
-                                Выбрать этот вариант
-                            </label>
-                        </div>
-                    </div>
-                </label>
-                {% endfor %}
-
-                <div class="d-grid gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        Продолжить
-                    </button>
-                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
-                        Назад в личный кабинет
-                    </a>
-                </div>
-            </form>
+    <!-- Индикатор этапов -->
+    <div class="creation-stepper mb-5">
+        <div class="step-indicator">
+            <div class="step-badge step-active">1</div>
+            <span class="text-blue-600 font-semibold">Тип размещения</span>
+            <div class="flex-1 border-t-2 border-dashed mx-2"></div>
+            <div class="step-badge step-inactive">2</div>
+            <span class="text-gray-500">Тип недвижимости</span>
+            <div class="flex-1 border-t-2 border-dashed mx-2"></div>
+            <div class="step-badge step-inactive">3</div>
+            <span class="text-gray-500">Детали объекта</span>
         </div>
     </div>
+
+    <h2 class="selection-title">Выберите тип размещения</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row g-4">
+            {% for listing_type in form.listing_type.field.queryset %}
+                <div class="col-12 col-md-6">
+                    <label class="d-block">
+                        <div class="type-card {% if form.listing_type.value == listing_type.pk %}active{% endif %}
+                                            {% if listing_type.is_featured %}premium{% endif %}">
+                            {% if listing_type.is_featured %}
+                                <span class="badge-premium">ПРЕМИУМ</span>
+                            {% endif %}
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="type-title mb-0">{{ listing_type.name }}</h3>
+                                <span class="price-tag">{{ listing_type.price }} ₽</span>
+                            </div>
+
+                            <div class="duration-info">
+                                Срок размещения: {{ listing_type.duration_days }} дней
+                            </div>
+
+                            <p class="type-description">{{ listing_type.description }}</p>
+
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="radio"
+                                       name="{{ form.listing_type.name }}"
+                                       id="id_{{ form.listing_type.name }}_{{ forloop.counter0 }}"
+                                       value="{{ listing_type.pk }}"
+                                       {% if form.listing_type.value == listing_type.pk %}checked{% endif %}>
+                                <label class="form-check-label" for="id_{{ form.listing_type.name }}_{{ forloop.counter0 }}">
+                                    Выбрать этот вариант
+                                </label>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-grid gap-2 mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">
+                Продолжить
+            </button>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                Назад в личный кабинет
+            </a>
+        </div>
+    </form>
 </div>
 {% endblock %}

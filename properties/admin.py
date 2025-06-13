@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import PropertyType, Property, PropertyImage
-
+from .models import ListingType
 
 class PropertyImageInline(admin.TabularInline):
     model = PropertyImage
@@ -66,3 +66,10 @@ def approve_properties(modeladmin, request, queryset):
 class PropertyTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'icon')  # Поля для отображения
     search_fields = ('name',)
+
+
+@admin.register(ListingType)
+class ListingTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'price', 'duration_days', 'is_featured')
+    list_filter = ('is_featured',)
+    search_fields = ('name', 'description')

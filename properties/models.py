@@ -255,6 +255,8 @@ class ListingType(models.Model):
     is_featured = models.BooleanField(default=False, verbose_name='Премиум размещение')
     description = models.TextField(verbose_name='Описание')
 
+
+
     class Meta:
         verbose_name = 'Тип размещения'
         verbose_name_plural = 'Типы размещений'

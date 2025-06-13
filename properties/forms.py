@@ -124,5 +124,6 @@ class ListingTypeForm(forms.Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        # Убедитесь, что queryset не пустой
         self.fields['listing_type'].queryset = ListingType.objects.all()
         self.user = user
