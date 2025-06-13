@@ -1,10 +1,9 @@
 FROM python:3.10-slim
 WORKDIR /app
 
-# Порт по умолчанию
 ENV PORT=8000
+ENV PYTHONUNBUFFERED=1
 
-# Установка системных зависимостей
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     python3-dev \
@@ -15,12 +14,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
-# Создаем папки для медиафайлов
-RUN mkdir -p /app/media/avatars /app/media/properties /app/media/property_images
+# Создаем необходимые директории
+RUN mkdir -p /app/media /app/static
+RUN chmod -R 755 /app/media
 
-# Создаем папку для статики и собираем файлы
-RUN mkdir -p /app/static
+# Собираем статику
 RUN python manage.py collectstatic --noinput --clear
 
-# Запуск через Gunicorn
 CMD ["sh", "-c", "gunicorn real_estate_portal.wsgi --bind 0.0.0.0:$PORT"]

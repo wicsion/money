@@ -137,11 +137,15 @@ USE_TZ = True
 
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+WHITENOISE_MAX_AGE = 86400
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Настройки Whitenoise для статических файлов
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -150,26 +154,26 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
 
-AWS_S3_SIGNATURE_VERSION = 's3v4'
-AWS_DEFAULT_ACL = 'public-read'
-AWS_QUERYSTRING_AUTH = False
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
+#AWS_S3_SIGNATURE_VERSION = 's3v4'
+#AWS_DEFAULT_ACL = 'public-read'
+#AWS_QUERYSTRING_AUTH = False
+#AWS_S3_OBJECT_PARAMETERS = {
+    #'CacheControl': 'max-age=86400',
+#}
 
-if DEBUG:
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+#if DEBUG:
+    #DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     # Убедитесь, что MEDIA_ROOT и MEDIA_URL настроены
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-else:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+   # MEDIA_URL = '/media/'
+    #MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+#else:
+    #DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     # Настройки S3 (оставьте ваши текущие AWS-ключи и endpoint)
-    AWS_ACCESS_KEY_ID = '95bf86962b9e4d1d94958be095e5d901'
-    AWS_SECRET_ACCESS_KEY = 'fpwzZRsVN2jkAkUD9hvYQ5'
-    AWS_STORAGE_BUCKET_NAME = 'winwindeal'
-    AWS_S3_ENDPOINT_URL = 'https://hb.ru-1.storage.cloud.mail.ru'
-    AWS_S3_REGION_NAME = 'ru-1'
+    #AWS_ACCESS_KEY_ID = '95bf86962b9e4d1d94958be095e5d901'
+   # AWS_SECRET_ACCESS_KEY = 'fpwzZRsVN2jkAkUD9hvYQ5'
+    #AWS_STORAGE_BUCKET_NAME = 'winwindeal'
+   # AWS_S3_ENDPOINT_URL = 'https://hb.ru-1.storage.cloud.mail.ru'
+   # AWS_S3_REGION_NAME = 'ru-1'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
