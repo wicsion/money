@@ -178,7 +178,9 @@ DEFAULT_FROM_EMAIL = 'WinWinDeal <goldinpav@yandex.ru>'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 YOOMONEY_ACCOUNT_ID = '1105130'
 YOOMONEY_SECRET_KEY = 'test_evMMyWGLIawYaOMUELuBxzSO5XJbnaDcrJeulp2lX8w'
-
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
 
 
 class OwnerAdminMixin:

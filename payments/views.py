@@ -112,9 +112,8 @@ def yookassa_webhook(request):
     return HttpResponse(status=400)
 
 
-# Перенесите эту функцию ВНЕ yookassa_webhook, но в том же файле
 def _verify_signature(request):
-    """Проверка подписи вебхука"""
+    """Проверка подписи с дополнительными fallback-вариантами"""
     from hashlib import sha256
     import hmac
     import base64
@@ -122,23 +121,32 @@ def _verify_signature(request):
     secret_key = settings.YOOMONEY_SECRET_KEY.encode('utf-8')
     message = request.body
 
-    # Получаем подпись из заголовка
-    signature_header = request.headers.get('X-Content-Signature-SHA256', '')
-    if not signature_header:
-        logger.error("Missing X-Content-Signature-SHA256 header")
-        return False
+    # Варианты заголовков, которые может использовать YooKassa
+    signature_headers = [
+        'HTTP_X_CONTENT_SIGNATURE_SHA256',  # Django добавляет HTTP_ к заголовкам
+        'X-Content-Signature-SHA256',
+        'Content-Signature'
+    ]
 
-    try:
-        signature = signature_header.split('=')[1]
-    except IndexError:
-        logger.error(f"Malformed signature header: {signature_header}")
-        return False
+    signature = None
+    for header in signature_headers:
+        if header in request.META:
+            signature_header = request.META[header]
+            try:
+                signature = signature_header.split('=')[1]
+                break
+            except (IndexError, AttributeError):
+                continue
 
-    # Вычисляем HMAC
+    if not signature:
+        logger.error("No valid signature header found. Available headers: %s",
+                     dict(request.headers))
+        return False  # Или True для временного отключения проверки в тестовом режиме
+
     hmac_obj = hmac.new(secret_key, message, sha256)
     calculated_signature = base64.b64encode(hmac_obj.digest()).decode('utf-8')
 
-    logger.info(f"Calculated signature: {calculated_signature}")
-    logger.info(f"Received signature: {signature}")
+    logger.info("Signature verification:\nCalculated: %s\nReceived: %s",
+                calculated_signature, signature)
 
     return hmac.compare_digest(calculated_signature, signature)
