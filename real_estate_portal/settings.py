@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-ваш-резерв
 
 DEBUG = False
 handler500 = 'accounts.views.server_error'
-ALLOWED_HOSTS = ['winwindeal.up.railway.app','127.0.0.1']
+ALLOWED_HOSTS = ['winwindeal.up.railway.app']
 
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -140,13 +140,13 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-#MEDIA_URL = '/media/'
-#MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 AUTH_USER_MODEL = 'accounts.User'
 
-
+CORS_ALLOWED_ORIGINS = ['https://winwindeal.up.railway.app']
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
