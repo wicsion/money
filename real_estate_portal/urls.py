@@ -6,11 +6,13 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_view, name='home'),
+    path('yookassa-webhook/', include('payments.urls')),
     path('accounts/', include('accounts.urls')),
     path('brokers/', include('brokers.urls')),
     path('payments/', include('payments.urls')),
     path('developers/', include('developers.urls')),
     path('properties/', include('properties.urls')),
+
     path('password_reset/',
          auth_views.PasswordResetView.as_view(
              template_name='accounts/password_reset.html'
