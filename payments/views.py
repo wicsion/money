@@ -68,6 +68,9 @@ def yookassa_webhook(request):
     try:
         event_json = json.loads(request.body)
         notification = WebhookNotification(event_json)
+        if not _verify_signature(request) and not settings.DEBUG:
+            logger.error("Invalid webhook signature")
+            return HttpResponse(status=400)
 
         # Исправленный вызов (без self)
         if not _verify_signature(request):
@@ -113,7 +116,7 @@ def yookassa_webhook(request):
 
 
 def _verify_signature(request):
-    """Проверка подписи с дополнительными fallback-вариантами"""
+    """Проверка подписи вебхука для YooKassa"""
     from hashlib import sha256
     import hmac
     import base64
@@ -121,32 +124,28 @@ def _verify_signature(request):
     secret_key = settings.YOOMONEY_SECRET_KEY.encode('utf-8')
     message = request.body
 
-    # Варианты заголовков, которые может использовать YooKassa
-    signature_headers = [
-        'HTTP_X_CONTENT_SIGNATURE_SHA256',  # Django добавляет HTTP_ к заголовкам
-        'X-Content-Signature-SHA256',
-        'Content-Signature'
-    ]
+    # Получаем подпись из заголовка Signature
+    signature_header = request.headers.get('Signature', '')
+    if not signature_header:
+        logger.error("Missing Signature header")
+        return False
 
-    signature = None
-    for header in signature_headers:
-        if header in request.META:
-            signature_header = request.META[header]
-            try:
-                signature = signature_header.split('=')[1]
-                break
-            except (IndexError, AttributeError):
-                continue
+    try:
+        # Формат: "v1 2fdd90a1 1 <actual_signature>"
+        signature_parts = signature_header.split()
+        if len(signature_parts) < 4:
+            logger.error(f"Invalid signature format: {signature_header}")
+            return False
 
-    if not signature:
-        logger.error("No valid signature header found. Available headers: %s",
-                     dict(request.headers))
-        return False  # Или True для временного отключения проверки в тестовом режиме
+        signature = signature_parts[3]
+    except Exception as e:
+        logger.error(f"Error parsing signature: {str(e)}")
+        return False
 
+    # Вычисляем HMAC
     hmac_obj = hmac.new(secret_key, message, sha256)
     calculated_signature = base64.b64encode(hmac_obj.digest()).decode('utf-8')
 
-    logger.info("Signature verification:\nCalculated: %s\nReceived: %s",
-                calculated_signature, signature)
+    logger.info(f"Signature verification:\nCalculated: {calculated_signature}\nReceived: {signature}")
 
     return hmac.compare_digest(calculated_signature, signature)
