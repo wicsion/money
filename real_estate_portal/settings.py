@@ -13,7 +13,7 @@ sys.path.append(str(BASE_DIR))
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-ваш-резервный-ключ-для-разработки')
 
-DEBUG = False
+DEBUG = True
 handler500 = 'accounts.views.server_error'
 ALLOWED_HOSTS = ['winwindeal.up.railway.app']
 
