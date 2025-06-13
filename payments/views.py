@@ -3,7 +3,7 @@ from django.contrib import messages
 from yookassa import Configuration
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
-from yookassa.domain.notification import WebhookNotification
+from yookassa.domain.notification import WebhookNotification, WebhookNotificationFactory
 import json
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -59,38 +59,33 @@ def payment_success_view(request):
 
 @csrf_exempt
 def yookassa_webhook(request):
-    logger.info(f"Incoming webhook headers: {dict(request.headers)}")
-    logger.info(f"Raw webhook body: {request.body.decode('utf-8')}")
-
     if request.method != 'POST':
         return HttpResponse(status=400)
 
     try:
-        event_json = json.loads(request.body)
-        notification = WebhookNotification(event_json)
-        if not _verify_signature(request) and not settings.DEBUG:
-            logger.error("Invalid webhook signature")
-            return HttpResponse(status=400)
+        factory = WebhookNotificationFactory()
+        notification = factory.parse(
+            request.headers,
+            request.body,
+            settings.YOOMONEY_SECRET_KEY
+        )
 
-        # Исправленный вызов (без self)
-        if not _verify_signature(request):
-            logger.error("Invalid webhook signature")
-            return HttpResponse(status=400)
-
-        if notification.object.status == 'succeeded' and notification.object.paid:
-            payment = notification.object
+        # Проверка успешного платежа
+        payment = notification.object
+        if payment.status == 'succeeded' and payment.paid:
             metadata = payment.metadata
 
-            if 'user_id' in metadata:
-                user_id = metadata['user_id']
-                amount = float(payment.amount.value)
+            if 'user_id' not in metadata:
+                logger.error("No user_id in metadata")
+                return HttpResponse(status=400)
 
-                # Обновляем баланс с дополнительным логированием
+            user_id = metadata['user_id']
+            amount = float(payment.amount.value)
+
+            try:
                 user = User.objects.get(id=user_id)
-                logger.info(f"User {user_id} current balance: {user.balance}")
                 user.balance += amount
                 user.save()
-                logger.info(f"User {user_id} new balance: {user.balance}")
 
                 PaymentModel.objects.create(
                     user=user,
@@ -100,52 +95,17 @@ def yookassa_webhook(request):
                     transaction_id=payment.id
                 )
 
-                logger.info(f"Balance updated for user {user_id}: +{amount} RUB")
+                logger.info(f"User {user_id} balance topped up: {amount} RUB")
                 return HttpResponse(status=200)
-            else:
-                logger.error("No user_id in metadata")
+
+            except User.DoesNotExist:
+                logger.error(f"User with id {user_id} not found")
+                return HttpResponse(status=400)
+
         else:
-            logger.error(
-                f"Payment not succeeded or not paid. Status: {notification.object.status}, Paid: {notification.object.paid}")
+            logger.warning(f"Ignored event: status={payment.status}, paid={payment.paid}")
+            return HttpResponse(status=200)  # Чтобы не переотправляли
 
     except Exception as e:
-        logger.error(f"Webhook processing error: {str(e)}", exc_info=True)
+        logger.error(f"Webhook error: {str(e)}", exc_info=True)
         return HttpResponse(status=400)
-
-    return HttpResponse(status=400)
-
-
-def _verify_signature(request):
-    """Проверка подписи вебхука для YooKassa"""
-    from hashlib import sha256
-    import hmac
-    import base64
-
-    secret_key = settings.YOOMONEY_SECRET_KEY.encode('utf-8')
-    message = request.body
-
-    # Получаем подпись из заголовка Signature
-    signature_header = request.headers.get('Signature', '')
-    if not signature_header:
-        logger.error("Missing Signature header")
-        return False
-
-    try:
-        # Формат: "v1 2fdd90a1 1 <actual_signature>"
-        signature_parts = signature_header.split()
-        if len(signature_parts) < 4:
-            logger.error(f"Invalid signature format: {signature_header}")
-            return False
-
-        signature = signature_parts[3]
-    except Exception as e:
-        logger.error(f"Error parsing signature: {str(e)}")
-        return False
-
-    # Вычисляем HMAC
-    hmac_obj = hmac.new(secret_key, message, sha256)
-    calculated_signature = base64.b64encode(hmac_obj.digest()).decode('utf-8')
-
-    logger.info(f"Signature verification:\nCalculated: {calculated_signature}\nReceived: {signature}")
-
-    return hmac.compare_digest(calculated_signature, signature)
