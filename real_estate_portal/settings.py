@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-ваш-резерв
 
 DEBUG = True
 handler500 = 'accounts.views.server_error'
-ALLOWED_HOSTS = ['winwindeal.up.railway.app']
+ALLOWED_HOSTS = ['winwindeal.up.railway.app' ]
 
 
 CORS_ALLOW_ALL_ORIGINS = True

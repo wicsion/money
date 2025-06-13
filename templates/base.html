@@ -53,6 +53,22 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+            html, body {
+            height: 100%;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: #f9fafb; /* bg-gray-50 */
+        }
+        main {
+            flex: 1 0 auto;
+            padding-bottom: 2rem; /* Дополнительный отступ снизу */
+        }
+        footer {
+            flex-shrink: 0;
+        }
+
     </style>
     {% block extra_css %}{% endblock %}
 </head>
