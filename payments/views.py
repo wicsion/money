@@ -60,6 +60,9 @@ def payment_success_view(request):
 @csrf_exempt
 def yookassa_webhook(request):
     logger.info(f"Incoming webhook: {request.body}")
+    logger.info(f"Webhook raw data: {request.body.decode('utf-8')}")
+    logger.info(f"Webhook headers: {request.headers}")
+    logger.info(f"Webhook body: {request.body.decode('utf-8')}")
     if request.method == 'POST':
         try:
             event_json = json.loads(request.body)
