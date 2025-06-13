@@ -59,47 +59,64 @@ def payment_success_view(request):
 
 @csrf_exempt
 def yookassa_webhook(request):
-    logger.info(f"Incoming webhook: {request.body}")
-    logger.info(f"Webhook raw data: {request.body.decode('utf-8')}")
-    logger.info(f"Webhook headers: {request.headers}")
-    logger.info(f"Webhook body: {request.body.decode('utf-8')}")
-    if request.method == 'POST':
-        try:
-            event_json = json.loads(request.body)
-            notification = WebhookNotification(event_json)
+    logger.info(f"Incoming webhook headers: {request.headers}")
+    logger.info(f"Raw webhook body: {request.body.decode('utf-8')}")
 
-            # Проверка подписи
-            if not notification.validate(settings.YOOMONEY_SECRET_KEY):
-                logger.error("Invalid webhook signature")
-                return HttpResponse(status=400)
+    if request.method != 'POST':
+        return HttpResponse(status=400)
 
-            if notification.object.status == 'succeeded' and notification.object.paid:
-                payment = notification.object
-                metadata = payment.metadata
+    try:
+        event_json = json.loads(request.body)
+        notification = WebhookNotification(event_json)
 
-                if 'user_id' in metadata:
-                    user_id = metadata['user_id']
-                    amount = float(payment.amount.value)
-
-                    # Обновляем баланс
-                    user = User.objects.get(id=user_id)
-                    user.balance += amount
-                    user.save()
-
-                    # Создаем запись о платеже
-                    PaymentModel.objects.create(
-                        user=user,
-                        amount=amount,
-                        payment_method='yookassa',
-                        status='completed',
-                        transaction_id=payment.id
-                    )
-
-                    logger.info(f"Balance updated for user {user_id}: +{amount} RUB")
-                    return HttpResponse(status=200)
-
-        except Exception as e:
-            logger.error(f"Webhook error: {str(e)}", exc_info=True)
+        # --- Новая проверка подписи (актуальный метод) ---
+        if not self._verify_signature(request):
+            logger.error("Invalid webhook signature")
             return HttpResponse(status=400)
 
+        if notification.object.status == 'succeeded' and notification.object.paid:
+            payment = notification.object
+            metadata = payment.metadata
+
+            if 'user_id' in metadata:
+                user_id = metadata['user_id']
+                amount = float(payment.amount.value)
+
+                # Обновляем баланс
+                user = User.objects.get(id=user_id)
+                user.balance += amount
+                user.save()
+
+                # Создаем запись о платеже
+                PaymentModel.objects.create(
+                    user=user,
+                    amount=amount,
+                    payment_method='yookassa',
+                    status='completed',
+                    transaction_id=payment.id
+                )
+
+                logger.info(f"Balance updated for user {user_id}: +{amount} RUB")
+                return HttpResponse(status=200)
+
+    except Exception as e:
+        logger.error(f"Webhook processing error: {str(e)}", exc_info=True)
+        return HttpResponse(status=400)
+
     return HttpResponse(status=400)
+
+
+def _verify_signature(self, request):
+    """Проверка подписи вебхука вручную"""
+    from hashlib import sha256
+    import hmac
+    import base64
+
+    secret_key = settings.YOOMONEY_SECRET_KEY.encode('utf-8')
+    message = request.body
+    signature = request.headers.get('Content-Signature', '').split('=')[1]
+
+    hmac_obj = hmac.new(secret_key, message, sha256)
+    calculated_signature = base64.b64encode(hmac_obj.digest()).decode('utf-8')
+
+    return hmac.compare_digest(calculated_signature, signature)
