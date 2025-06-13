@@ -2,6 +2,10 @@ from django.db import models
 from django.conf import settings
 
 class Payment(models.Model):
+    class PaymentStatus(models.TextChoices):
+        PENDING = 'pending', 'Ожидает'
+        COMPLETED = 'completed', 'Завершён'
+        CANCELED = 'canceled', 'Отменён'
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)

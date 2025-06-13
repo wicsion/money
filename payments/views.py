@@ -11,7 +11,6 @@ import logging
 from yookassa import Payment
 from payments.models import Payment as PaymentModel
 
-
 logger = logging.getLogger(__name__)
 User = get_user_model()
 Configuration.account_id = settings.YOOMONEY_ACCOUNT_ID
@@ -57,54 +56,60 @@ def payment_success_view(request):
     return redirect('dashboard')
 
 
+
 @csrf_exempt
 def yookassa_webhook(request):
     if request.method != 'POST':
-        return HttpResponse(status=400)
+        return HttpResponse(status=405)
 
     try:
-        factory = WebhookNotificationFactory()
-        notification = factory.parse(
-            request.headers,
-            request.body,
-            settings.YOOMONEY_SECRET_KEY
+        event_json = json.loads(request.body.decode('utf-8'))
+
+        # Проверка типа события
+        if event_json.get('event') != 'payment.succeeded':
+            logger.warning(f"Ignored event: {event_json.get('event')}")
+            return HttpResponse(status=200)
+
+        # Получение объекта платежа
+        payment_object = event_json.get('object', {})
+        metadata = payment_object.get('metadata', {})
+        payment_id = payment_object.get('id')
+        paid = payment_object.get('paid')
+        status = payment_object.get('status')
+
+        if status != 'succeeded' or not paid:
+            logger.warning(f"Ignored payment: status={status}, paid={paid}")
+            return HttpResponse(status=200)
+
+        if 'user_id' not in metadata:
+            logger.error("No user_id in metadata")
+            return HttpResponse(status=400)
+
+        user_id = metadata['user_id']
+        amount = float(payment_object['amount']['value'])
+
+        if PaymentModel.objects.filter(transaction_id=payment_id).exists():
+            logger.info(f"Duplicate webhook for payment {payment_id}")
+            return HttpResponse(status=200)
+
+        user = User.objects.get(id=user_id)
+        user.balance += amount
+        user.save()
+
+        PaymentModel.objects.create(
+            user=user,
+            amount=amount,
+            payment_method='yookassa',
+            status='completed',
+            transaction_id=payment_id
         )
 
-        # Проверка успешного платежа
-        payment = notification.object
-        if payment.status == 'succeeded' and payment.paid:
-            metadata = payment.metadata
+        logger.info(f"User {user_id} balance topped up: {amount} RUB")
+        return HttpResponse(status=200)
 
-            if 'user_id' not in metadata:
-                logger.error("No user_id in metadata")
-                return HttpResponse(status=400)
-
-            user_id = metadata['user_id']
-            amount = float(payment.amount.value)
-
-            try:
-                user = User.objects.get(id=user_id)
-                user.balance += amount
-                user.save()
-
-                PaymentModel.objects.create(
-                    user=user,
-                    amount=amount,
-                    payment_method='yookassa',
-                    status='completed',
-                    transaction_id=payment.id
-                )
-
-                logger.info(f"User {user_id} balance topped up: {amount} RUB")
-                return HttpResponse(status=200)
-
-            except User.DoesNotExist:
-                logger.error(f"User with id {user_id} not found")
-                return HttpResponse(status=400)
-
-        else:
-            logger.warning(f"Ignored event: status={payment.status}, paid={payment.paid}")
-            return HttpResponse(status=200)  # Чтобы не переотправляли
+    except User.DoesNotExist:
+        logger.error(f"User with id {user_id} not found")
+        return HttpResponse(status=400)
 
     except Exception as e:
         logger.error(f"Webhook error: {str(e)}", exc_info=True)
