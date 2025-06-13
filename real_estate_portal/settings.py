@@ -176,8 +176,8 @@ DEFAULT_FROM_EMAIL = 'WinWinDeal <goldinpav@yandex.ru>'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-YOOMONEY_ACCOUNT_ID = '1105094'
-YOOMONEY_SECRET_KEY = 'test_x7XDBuWxzxGRejN25zbQiwsCF4eX2L1By9kEWt_RQjc'
+YOOMONEY_ACCOUNT_ID = '1105130'
+YOOMONEY_SECRET_KEY = 'test_evMMyWGLIawYaOMUELuBxzSO5XJbnaDcrJeulp2lX8w'
 
 
 class OwnerAdminMixin:

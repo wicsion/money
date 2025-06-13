@@ -720,7 +720,7 @@ class DirectContactBrokerConsultView(LoginRequiredMixin, View):
             contact_request.status = 'in_progress'
             contact_request.save()
 
-            messages.success(request, "Консультация успешно оплачена. 10 руб. списаны с вашего баланса")
+
             return redirect('contact_request_detail', pk=contact_request.pk)
 
         except Exception as e:
