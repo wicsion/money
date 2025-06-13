@@ -17,5 +17,7 @@ urlpatterns = [
     path('<int:pk>/favorite/', views.toggle_favorite, name='property-favorite'),
     path('<int:pk>/delete/', PropertyDeleteView.as_view(), name='property-delete'),
     path('api/brokers/', views.BrokerSearchView.as_view(), name='broker-search'),
+    path('create/select-listing-type/', views.SelectListingTypeView.as_view(), name='select-listing-type'),
+
 
 ]
