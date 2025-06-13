@@ -1,5 +1,5 @@
 from django import forms
-from .models import Property, PropertyImage
+from .models import Property, PropertyImage, ListingType
 
 
 class PropertyForm(forms.ModelForm):
@@ -111,3 +111,18 @@ class PropertyImageForm(forms.ModelForm):
     class Meta:
         model = PropertyImage
         fields = ['images']
+
+
+class ListingTypeForm(forms.Form):
+    listing_type = forms.ModelChoiceField(
+        queryset=ListingType.objects.all(),
+        widget=forms.RadioSelect,
+        empty_label=None,
+        label='Выберите тип размещения'
+    )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        self.fields['listing_type'].queryset = ListingType.objects.all()
+        self.user = user

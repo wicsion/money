@@ -248,3 +248,16 @@ class PropertyImage(models.Model):
         return f"Изображение для {self.property.title}"
 
 
+class ListingType(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Название')
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена')
+    duration_days = models.PositiveIntegerField(verbose_name='Длительность (дни)')
+    is_featured = models.BooleanField(default=False, verbose_name='Премиум размещение')
+    description = models.TextField(verbose_name='Описание')
+
+    class Meta:
+        verbose_name = 'Тип размещения'
+        verbose_name_plural = 'Типы размещений'
+
+    def __str__(self):
+        return self.name

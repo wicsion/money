@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .listing-card {
+        border: 2px solid #e5e7eb;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .listing-card:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+    }
+
+    .listing-card.premium {
+        border-color: #f59e0b;
+        background: linear-gradient(to bottom right, #fff7ed, #fff);
+    }
+
+    .listing-card.premium:hover {
+        border-color: #f59e0b;
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.1);
+    }
+
+    .price-tag {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #3b82f6;
+    }
+
+    .premium .price-tag {
+        color: #f59e0b;
+    }
+
+    .badge-premium {
+        background: #f59e0b;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="text-center mb-5">Выберите тип размещения</h2>
+
+            <form method="post">
+                {% csrf_token %}
+
+                {% for choice in form.listing_type %}
+                <label class="d-block">
+                    <div class="listing-card {% if choice.data.value.instance.is_featured %}premium{% endif %}">
+                        {% if choice.data.value.instance.is_featured %}
+                        <span class="badge-premium">ПРЕМИУМ</span>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="mb-0">{{ choice.data.value.instance.name }}</h3>
+                            <span class="price-tag">{{ choice.data.value.instance.price }} ₽</span>
+                        </div>
+
+                        <p class="text-muted mb-4">{{ choice.data.value.instance.description }}</p>
+
+                        <div class="form-check">
+                            {{ choice.tag }}
+                            <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                Выбрать этот вариант
+                            </label>
+                        </div>
+                    </div>
+                </label>
+                {% endfor %}
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Продолжить
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                        Назад в личный кабинет
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

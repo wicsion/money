@@ -1,6 +1,10 @@
+from datetime import timedelta
+
+from django.core.checks import messages
 from django.db import transaction
 from django.db.models import Q
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
 from django.views import View
 from django.views.generic import ( DetailView,
                                    CreateView,
@@ -10,12 +14,14 @@ from django.contrib.auth.mixins import (LoginRequiredMixin, UserPassesTestMixin)
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django_filters.views import FilterView
-from .models import Property, PropertyImage,  PropertyType
+from .models import Property, PropertyImage, PropertyType, ListingType
 from .filters import PropertyFilter
-from .forms import PropertyForm
+from .forms import PropertyForm, ListingTypeForm
 from  accounts.models import User
 from accounts.models import Favorite
 from django.contrib.auth.decorators import login_required
+from payments.models import Payment
+
 
 class PropertyListView(FilterView):
     model = Property
@@ -75,6 +81,18 @@ class PropertyCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         with transaction.atomic():  # Начало атомарной транзакции
+            listing_type_id = self.request.session.get('selected_listing_type')
+            if listing_type_id:
+                listing_type = ListingType.objects.get(id=listing_type_id)
+                self.object.listing_type = listing_type
+                self.object.listing_end_date = timezone.now() + timedelta(days=listing_type.duration_days)
+                self.object.is_featured = listing_type.is_featured
+
+                # Очищаем сессию
+                del self.request.session['selected_listing_type']
+
+            self.object.save()
+
             # Проверка наличия профиля брокера
             if not hasattr(self.request.user, 'broker_profile'):
                 form.add_error(None, "Профиль брокера не найден. Заполните данные в разделе профиля.")
@@ -247,3 +265,40 @@ class BrokerSearchView(View):
         } for broker in brokers]
 
         return JsonResponse({"brokers": brokers_data})
+
+
+class SelectListingTypeView(LoginRequiredMixin, View):
+    template_name = 'properties/select_listing_type.html'
+
+    def get(self, request):
+        form = ListingTypeForm(user=request.user)
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = ListingTypeForm(request.POST, user=request.user)
+        if form.is_valid():
+            listing_type = form.cleaned_data['listing_type']
+
+            # Проверка баланса
+            if request.user.balance < listing_type.price:
+                messages.error(request, "Недостаточно средств на балансе")
+                return redirect('dashboard')
+
+            # Создаем платеж
+            payment = Payment.objects.create(
+                user=request.user,
+                amount=listing_type.price,
+                payment_method='balance',
+                status='completed',
+                description=f"Оплата размещения типа: {listing_type.name}"
+            )
+
+            # Списание средств
+            request.user.balance -= listing_type.price
+            request.user.save()
+
+            # Сохраняем выбранный тип в сессии
+            request.session['selected_listing_type'] = listing_type.id
+            return redirect('select-property-type')
+
+        return render(request, self.template_name, {'form': form})
