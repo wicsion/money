@@ -84,26 +84,49 @@
                 <a href="{% url 'property-list' %}" class="hover:text-blue-200">Объекты</a>
             </div>
 
-            <div class="flex items-center space-x-4">
-                {% if user.is_authenticated %}
-                    <div class="flex items-center space-x-3">
-                        <a href="{% url 'dashboard' %}" class="hover:text-blue-200 flex items-center">
-                            <i class="fas fa-user-circle text-xl mr-1"></i>
-                        </a>
-                        <span class="bonus-badge text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-    {{ user.balance }} ₽
-</span>
-                        <a href="{% url 'payment_topup' %}"
-   class="topup-btn text-white px-3 py-1 rounded-lg text-sm font-medium">
-    Пополнить
-</a>
-                    </div>
-                    <a href="{% url 'logout' %}" class="hover:text-blue-200">Выйти</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="hover:text-blue-200">Войти</a>
-                    <a href="{% url 'register' %}" class="bg-blue-700 px-4 py-2 rounded hover:bg-blue-800">Регистрация</a>
-                {% endif %}
-            </div>
+          <div class="flex items-center space-x-2 md:space-x-4">
+    {% if user.is_authenticated %}
+        <div class="flex items-center space-x-1 md:space-x-3">
+            <!-- Иконка профиля -->
+            <a href="{% url 'dashboard' %}"
+               class="hover:text-blue-200 flex items-center p-1 md:p-0"
+               aria-label="Профиль">
+                <i class="fas fa-user-circle text-lg md:text-xl"></i>
+            </a>
+
+            <!-- Баланс -->
+            <span class="bonus-badge text-yellow-800 px-2 py-1 md:px-3 rounded-full text-xs md:text-sm font-medium whitespace-nowrap">
+                {{ user.balance }} ₽
+            </span>
+
+            <!-- Кнопка пополнения -->
+            <a href="{% url 'payment_topup' %}"
+               class="topup-btn text-white px-2 py-1 md:px-3 rounded-lg text-xs md:text-sm font-medium whitespace-nowrap">
+                Пополнить
+            </a>
+        </div>
+
+        <!-- Кнопка выхода -->
+        <a href="{% url 'logout' %}"
+           class="hover:text-blue-200 text-sm md:text-base p-1 md:p-0"
+           aria-label="Выйти">
+            <i class="fas fa-sign-out-alt md:hidden"></i>
+            <span class="hidden md:inline">Выйти</span>
+        </a>
+    {% else %}
+        <!-- Кнопки для неавторизованных -->
+        <a href="{% url 'login' %}"
+           class="hover:text-blue-200 text-sm md:text-base p-1 md:p-0"
+           aria-label="Войти">
+            <i class="fas fa-sign-in-alt md:hidden"></i>
+            <span class="hidden md:inline">Войти</span>
+        </a>
+        <a href="{% url 'register' %}"
+           class="bg-blue-700 px-2 py-1 md:px-4 md:py-2 rounded hover:bg-blue-800 text-xs md:text-base whitespace-nowrap">
+            Регистрация
+        </a>
+    {% endif %}
+</div>
         </div>
     </nav>
 
