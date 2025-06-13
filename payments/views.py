@@ -59,7 +59,7 @@ def payment_success_view(request):
 
 @csrf_exempt
 def yookassa_webhook(request):
-    logger.info(f"Incoming webhook headers: {request.headers}")
+    logger.info(f"Incoming webhook headers: {dict(request.headers)}")
     logger.info(f"Raw webhook body: {request.body.decode('utf-8')}")
 
     if request.method != 'POST':
@@ -69,8 +69,8 @@ def yookassa_webhook(request):
         event_json = json.loads(request.body)
         notification = WebhookNotification(event_json)
 
-        # --- Новая проверка подписи (актуальный метод) ---
-        if not self._verify_signature(request):
+        # Проверка подписи
+        if not _verify_signature(request):
             logger.error("Invalid webhook signature")
             return HttpResponse(status=400)
 
@@ -106,7 +106,7 @@ def yookassa_webhook(request):
     return HttpResponse(status=400)
 
 
-def _verify_signature(self, request):
+def _verify_signature(request):
     """Проверка подписи вебхука вручную"""
     from hashlib import sha256
     import hmac
@@ -114,7 +114,17 @@ def _verify_signature(self, request):
 
     secret_key = settings.YOOMONEY_SECRET_KEY.encode('utf-8')
     message = request.body
-    signature = request.headers.get('Content-Signature', '').split('=')[1]
+    signature_header = request.headers.get('X-Content-Signature-SHA256', '')
+
+    if not signature_header:
+        logger.error("Missing X-Content-Signature-SHA256 header")
+        return False
+
+    try:
+        signature = signature_header.split('=')[1]
+    except IndexError:
+        logger.error("Malformed signature header")
+        return False
 
     hmac_obj = hmac.new(secret_key, message, sha256)
     calculated_signature = base64.b64encode(hmac_obj.digest()).decode('utf-8')
