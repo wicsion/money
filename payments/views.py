@@ -69,7 +69,7 @@ def yookassa_webhook(request):
         event_json = json.loads(request.body)
         notification = WebhookNotification(event_json)
 
-        # Проверка подписи
+        # Исправленный вызов (без self)
         if not _verify_signature(request):
             logger.error("Invalid webhook signature")
             return HttpResponse(status=400)
@@ -82,12 +82,13 @@ def yookassa_webhook(request):
                 user_id = metadata['user_id']
                 amount = float(payment.amount.value)
 
-                # Обновляем баланс
+                # Обновляем баланс с дополнительным логированием
                 user = User.objects.get(id=user_id)
+                logger.info(f"User {user_id} current balance: {user.balance}")
                 user.balance += amount
                 user.save()
+                logger.info(f"User {user_id} new balance: {user.balance}")
 
-                # Создаем запись о платеже
                 PaymentModel.objects.create(
                     user=user,
                     amount=amount,
@@ -98,6 +99,11 @@ def yookassa_webhook(request):
 
                 logger.info(f"Balance updated for user {user_id}: +{amount} RUB")
                 return HttpResponse(status=200)
+            else:
+                logger.error("No user_id in metadata")
+        else:
+            logger.error(
+                f"Payment not succeeded or not paid. Status: {notification.object.status}, Paid: {notification.object.paid}")
 
     except Exception as e:
         logger.error(f"Webhook processing error: {str(e)}", exc_info=True)
@@ -106,16 +112,18 @@ def yookassa_webhook(request):
     return HttpResponse(status=400)
 
 
+# Перенесите эту функцию ВНЕ yookassa_webhook, но в том же файле
 def _verify_signature(request):
-    """Проверка подписи вебхука вручную"""
+    """Проверка подписи вебхука"""
     from hashlib import sha256
     import hmac
     import base64
 
     secret_key = settings.YOOMONEY_SECRET_KEY.encode('utf-8')
     message = request.body
-    signature_header = request.headers.get('X-Content-Signature-SHA256', '')
 
+    # Получаем подпись из заголовка
+    signature_header = request.headers.get('X-Content-Signature-SHA256', '')
     if not signature_header:
         logger.error("Missing X-Content-Signature-SHA256 header")
         return False
@@ -123,10 +131,14 @@ def _verify_signature(request):
     try:
         signature = signature_header.split('=')[1]
     except IndexError:
-        logger.error("Malformed signature header")
+        logger.error(f"Malformed signature header: {signature_header}")
         return False
 
+    # Вычисляем HMAC
     hmac_obj = hmac.new(secret_key, message, sha256)
     calculated_signature = base64.b64encode(hmac_obj.digest()).decode('utf-8')
+
+    logger.info(f"Calculated signature: {calculated_signature}")
+    logger.info(f"Received signature: {signature}")
 
     return hmac.compare_digest(calculated_signature, signature)
