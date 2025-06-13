@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 import logging
 from yookassa import Payment
 from payments.models import Payment as PaymentModel
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -65,12 +66,10 @@ def yookassa_webhook(request):
     try:
         event_json = json.loads(request.body.decode('utf-8'))
 
-        # Проверка типа события
         if event_json.get('event') != 'payment.succeeded':
             logger.warning(f"Ignored event: {event_json.get('event')}")
             return HttpResponse(status=200)
 
-        # Получение объекта платежа
         payment_object = event_json.get('object', {})
         metadata = payment_object.get('metadata', {})
         payment_id = payment_object.get('id')
@@ -86,7 +85,7 @@ def yookassa_webhook(request):
             return HttpResponse(status=400)
 
         user_id = metadata['user_id']
-        amount = float(payment_object['amount']['value'])
+        amount = Decimal(payment_object['amount']['value'])  # <-- исправлено
 
         if PaymentModel.objects.filter(transaction_id=payment_id).exists():
             logger.info(f"Duplicate webhook for payment {payment_id}")
